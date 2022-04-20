@@ -3,49 +3,83 @@ import Canvas from './canvas';
 
 declare global { interface Window { electron: Electron; } }
 
-class Main {
-    private canvas: Canvas;
-    private ctx: CanvasRenderingContext2D;
-    private dir = 0.01;
-    private val = 0;
+class Renderer {
+  private canvas: Canvas;
+  private ctx: CanvasRenderingContext2D;
 
-    constructor() {
-        this.canvas = new Canvas();
-        this.ctx = this.canvas.getCtx();
+  private width: number = 0;
+  private height: number = 0;
+
+  private lastFrameTime: number;
+  private intervalPos: number = 0;
+
+  private fps: number = 0;
+  private displayFps: number = 0;
+  private deltaTime: number = 0;
+  private displayDelta: number = 0;
+
+  constructor() {
+    this.canvas = new Canvas();
+    this.ctx = this.canvas.getCtx();
+    this.lastFrameTime = new Date().getTime();
+
+    this.setSize();
+    window.addEventListener('resize', () => {
+      this.setSize();
+    });
+  }
+
+  public onUpdate() {
+    this.calculateTime();
+    this.canvas.fill();
+    this.playField();
+    this.drawFPS();
+  }
+
+  private playField() {
+    this.ctx.strokeStyle = 'white';
+    this.ctx.fillStyle = 'white';
+
+    const sideLength = this.width <= this.height ? this.width : this.height;
+    const margin = sideLength * 0.1;
+    const side = sideLength - margin * 2;
+
+    const xStart = (this.width - sideLength) / 2 + margin;
+    const yStart = (this.height - sideLength) / 2 + margin;
+
+    this.ctx.strokeRect(xStart, yStart, side, side);
+  }
+
+  private setSize() {
+    this.height = window.innerHeight;
+    this.width = window.innerWidth;
+    this.canvas.setSize(this.width, this.height);
+  }
+
+  private calculateTime() {
+    const timeNow = new Date().getTime();
+    this.deltaTime = timeNow - this.lastFrameTime;
+    this.lastFrameTime = timeNow;
+
+    const deltaInSeconds = this.deltaTime / 1000;
+    this.fps = Math.round(1 / deltaInSeconds);
+
+    if (this.intervalPos === 0) {
+      this.displayDelta = this.deltaTime;
+      this.displayFps = this.fps;
     }
 
-    public onUpdate() {
-        this.val += this.dir;
+    this.intervalPos = this.intervalPos < 10 ? this.intervalPos + 1 : 0;
+  }
 
-        if (this.val <= 0 || this.val >= 1) {
-            this.dir = this.dir * -1;
-        }
-
-        this.canvas.fill();
-
-        this.ctx.beginPath();
-        this.ctx.arc(280, 190, 50, 0, 2 * Math.PI);
-
-        this.ctx.fillStyle = `rgba(204, 204, 0, ${this.val - 0.2})`;
-        this.ctx.fill();
-
-        this.ctx.font = "30px Arial";
-        this.ctx.fillStyle = `rgba(255, 255, 255, ${this.val + 0.2 * 3})`;
-        this.ctx.fillText('Hello World', 200, 200);
-    }
+  private drawFPS() {
+    const fontSize = 18;
+    const double = fontSize * 2;
+    this.ctx.fillStyle = 'white';
+    this.ctx.textAlign = 'right';
+    this.ctx.font = `${fontSize}px arial`;
+    this.ctx.fillText(`delta: ${this.displayDelta} fps: ${this.displayFps}`, this.width - double, 0 + double);
+  }
 }
 
-(async () => {
-    const main = new Main();
-
-    const loop = () => {
-        window.requestAnimationFrame(gameLoop);
-    }
-
-    const gameLoop = () => {
-        main.onUpdate();
-        loop();
-    }
-
-    loop();
-})();
+export default Renderer;
