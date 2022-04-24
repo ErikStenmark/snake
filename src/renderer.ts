@@ -137,7 +137,7 @@ class Renderer {
   }
 
   private drawCoordinates() {
-    this.ctx.strokeStyle = '#333';
+    this.ctx.strokeStyle = '#222';
     this.ctx.lineWidth = 1;
 
     this.coordinates.forEach(pos => {
