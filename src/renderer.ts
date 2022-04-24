@@ -1,8 +1,11 @@
 import { Electron } from './preload';
 import Canvas from './canvas';
 
-declare global { interface Window { electron: Electron; } }
+declare global { interface Window { electron: Electron; } };
+
 type Position = { x: number; y: number };
+type Direction = 'l' | 'r' | 'u' | 'd';
+
 class Renderer {
   private canvas: Canvas;
   private ctx: CanvasRenderingContext2D;
@@ -29,7 +32,7 @@ class Renderer {
 
   private snakePos: number[] = [];
 
-  private snakeDir = 'r';
+  private snakeDir: Direction = 'r';
   private snakeSize = 4;
 
   private blockAmount = 128;
@@ -242,12 +245,16 @@ class Renderer {
     this.intervalPos = this.intervalPos < this.maxInterval ? this.intervalPos + 1 : 0;
   }
 
-  private getSneakHead() {
+  private getSneakHeadCoordinateIndex() {
     return this.snakePos[this.snakePos.length - 1];
   }
 
+  private getSnakeFirstBodyCoordinateIndex() {
+    return this.snakePos.length > 1 ? this.snakePos[this.snakePos.length - 2] : null;
+  }
+
   private eat() {
-    const headCoordinateIndex = this.getSneakHead();
+    const headCoordinateIndex = this.getSneakHeadCoordinateIndex();
     const gotFood = headCoordinateIndex === this.foodPos;
 
     if (gotFood) {
@@ -269,50 +276,34 @@ class Renderer {
     return this.snakeSize * this.blockSize;
   }
 
+  private getSnakeNextPos(direction: Direction) {
+    const headCoordinateIndex = this.getSneakHeadCoordinateIndex();
+    const { x: headX, y: headY } = this.getCoordinateByIndex(headCoordinateIndex);
+    const nextPos = { x: headX, y: headY };
+
+    const movementAmount = this.getSnakeSize();
+
+    if (direction === 'r') {
+      nextPos.x = headX + movementAmount;
+    }
+
+    if (direction === 'l') {
+      nextPos.x = headX - movementAmount;
+    }
+
+    if (direction === 'u') {
+      nextPos.y = headY - movementAmount;
+    }
+
+    if (direction === 'd') {
+      nextPos.y = headY + movementAmount;
+    }
+
+    return nextPos;
+  }
+
   private snake() {
     const snakeSize = this.getSnakeSize();
-
-    if (this.firstRender) {
-      this.snakePos.push(1);
-    }
-
-    const headCoordinateIndex = this.getSneakHead();
-    const { x: headX, y: headY } = this.getCoordinateByIndex(headCoordinateIndex);
-
-    this.snakePos.forEach((pos, i) => {
-      this.ctx.fillStyle = i === this.snakePos.length - 1 ? 'lime' : 'darkgreen';
-      this.ctx.strokeStyle = 'black';
-      const coordinate = this.getCoordinateByIndex(pos);
-      this.ctx.fillRect(coordinate.x, coordinate.y, snakeSize, snakeSize);
-      this.ctx.strokeRect(coordinate.x + 1, coordinate.y + 1, snakeSize - 1, snakeSize - 1);
-    });
-
-    const latestKey = this.keysPressed.pop();
-
-    if (latestKey === 'ArrowUp' && this.snakeDir !== 'd') {
-      this.snakeDir = 'u'
-    }
-
-
-    if (latestKey === 'ArrowDown' && this.snakeDir !== 'u') {
-      this.snakeDir = 'd'
-    }
-
-    if (latestKey === 'ArrowLeft' && this.snakeDir !== 'r') {
-      this.snakeDir = 'l'
-    }
-
-    if (latestKey === 'ArrowRight' && this.snakeDir !== 'l') {
-      this.snakeDir = 'r'
-    }
-
-    const shouldMoveRight = this.snakeDir === 'r';
-    const shouldMoveLeft = this.snakeDir === 'l';
-    const shouldMoveUp = this.snakeDir === 'u';
-    const shouldMoveDown = this.snakeDir === 'd';
-
-    const nextPos = { x: headX, y: headY };
-    const movementAmount = snakeSize;
 
     const moveTo = (position: Position) => {
       const posIndex = this.getCoordinateIndex(position);
@@ -325,26 +316,46 @@ class Renderer {
       }
     }
 
+    const isFirstBodyInDirection = (direction: Direction) => {
+      const firstBodyCoIndex = this.getSnakeFirstBodyCoordinateIndex();
+      const nextPosCoordinate = this.getSnakeNextPos(direction);
+      const nextPosCoordinateIndex = this.getCoordinateIndex(nextPosCoordinate);
+      return nextPosCoordinateIndex === firstBodyCoIndex;
+    }
+
+    if (this.firstRender) {
+      this.snakePos.push(1);
+    }
+
+    this.snakePos.forEach((pos, i) => {
+      this.ctx.fillStyle = i === this.snakePos.length - 1 ? 'lime' : 'darkgreen';
+      this.ctx.strokeStyle = 'black';
+      const coordinate = this.getCoordinateByIndex(pos);
+      this.ctx.fillRect(coordinate.x, coordinate.y, snakeSize, snakeSize);
+      this.ctx.strokeRect(coordinate.x + 1, coordinate.y + 1, snakeSize - 1, snakeSize - 1);
+    });
+
+    const latestKey = this.keysPressed.pop();
+
+    if (latestKey === 'ArrowUp' && !isFirstBodyInDirection('u')) {
+      this.snakeDir = 'u'
+    }
+
+    if (latestKey === 'ArrowDown' && !isFirstBodyInDirection('d')) {
+      this.snakeDir = 'd'
+    }
+
+    if (latestKey === 'ArrowLeft' && !isFirstBodyInDirection('l')) {
+      this.snakeDir = 'l'
+    }
+
+    if (latestKey === 'ArrowRight' && !isFirstBodyInDirection('r')) {
+      this.snakeDir = 'r'
+    }
+
     if (this.elapsedDelta >= this.tickRate) {
-      if (shouldMoveRight) {
-        nextPos.x = headX + movementAmount;
-        moveTo(nextPos);
-      }
-
-      if (shouldMoveLeft) {
-        nextPos.x = headX - movementAmount;
-        moveTo(nextPos);
-      }
-
-      if (shouldMoveUp) {
-        nextPos.y = headY - movementAmount;
-        moveTo(nextPos);
-      }
-
-      if (shouldMoveDown) {
-        nextPos.y = headY + movementAmount;
-        moveTo(nextPos);
-      }
+      const nextPos = this.getSnakeNextPos(this.snakeDir);
+      moveTo(nextPos);
     }
   }
 }
