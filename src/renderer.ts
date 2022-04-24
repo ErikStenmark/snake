@@ -27,7 +27,7 @@ class Renderer {
   private tickRate = 20;
   private elapsedDelta: number = 0;
 
-  private snakePos: Position[] = [];
+  private snakePos: number[] = [];
 
   private snakeDir = 'r';
   private snakeSize = 4;
@@ -47,13 +47,8 @@ class Renderer {
     yEnd: 0
   }
 
-
-  private noFoodPos: Position = {
-    x: -1,
-    y: -1
-  }
-
-  private foodPos: Position = this.noFoodPos;
+  private noFoodPos: number = -1;
+  private foodPos: number = this.noFoodPos;
 
   constructor() {
     this.canvas = new Canvas();
@@ -65,8 +60,6 @@ class Renderer {
       this.setSize();
       this.calculatePlayArea();
       this.getAllCoordinates();
-      this.foodPos = this.noFoodPos;
-      this.snakePos[this.snakePos.length - 1] = this.coordinates[Math.round(this.coordinates.length / 2)];
     });
 
     window.addEventListener('keydown', e => {
@@ -107,7 +100,7 @@ class Renderer {
     const sideLength = Math.floor(smallerSide);
     const margin = Math.floor(smallerSide * 0.1);
 
-    this.playFieldWidth = this.roundDownToMultiple(sideLength - margin * 2, this.blockAmount);
+    this.playFieldWidth = Math.round(sideLength - margin * 2);
     this.blockSize = this.playFieldWidth / this.blockAmount;
 
     this.boundaries.xStart = (this.width - sideLength) / 2 + margin;
@@ -155,7 +148,6 @@ class Renderer {
       y += this.getSnakeSize();
     }
 
-    console.log('coordinates length:', coordinates.length);
     this.coordinates = coordinates;
   }
 
@@ -196,38 +188,33 @@ class Renderer {
     this.ctx.textAlign = 'right';
   }
 
-  private roundDownToMultiple(number: number, multiple: number) {
-    return number - (number % multiple);
+  private getCoordinateIndex = (position: Position) => {
+    return this.coordinates.findIndex(c => c.x === position.x && c.y === position.y);
+  }
+
+  private getCoordinateByIndex = (index: number) => {
+    return this.coordinates[index];
   }
 
   private food() {
     let foodPos = this.foodPos;
-    let originalCoordinatePosition = 0;
-    let coordinatePosition = 0;
 
-    const needsNewFood = (
-      foodPos.x === this.noFoodPos.x &&
-      foodPos.y === this.noFoodPos.y &&
-      this.coordinates.length
-    );
+    let firstRandomCoordinatePosition = 0;
 
+    const needsNewFood = foodPos === this.noFoodPos && this.coordinates.length;
 
     if (needsNewFood) {
-      coordinatePosition = this.randomIntFromInterval(0, this.coordinates.length - 1);
-      originalCoordinatePosition = coordinatePosition;
+      firstRandomCoordinatePosition = this.randomIntFromInterval(0, this.coordinates.length - 1);
+      foodPos = firstRandomCoordinatePosition;
 
-      foodPos = this.coordinates[coordinatePosition];
+      while (this.snakeIncludesCoordinateIndex(foodPos)) {
+        foodPos += 1
 
-      while (this.snakeIncludesCoordinates(foodPos)) {
-        coordinatePosition += 1
-        foodPos = this.coordinates[coordinatePosition];
-
-        if (coordinatePosition > this.coordinates.length - 1) {
-          coordinatePosition = 0;
-          foodPos = this.coordinates[coordinatePosition];
+        if (foodPos > this.coordinates.length - 1) {
+          foodPos = 0;
         }
 
-        if (coordinatePosition === originalCoordinatePosition) {
+        if (foodPos === firstRandomCoordinatePosition) {
           foodPos = this.noFoodPos;
         }
       }
@@ -236,13 +223,14 @@ class Renderer {
     }
 
 
-    if (this.snakeIncludesCoordinates(this.foodPos)) {
-      this.foodPos = this.coordinates.find(c => !this.snakeIncludesCoordinates(c)) || this.noFoodPos;
+    if (this.snakeIncludesCoordinateIndex(this.foodPos)) {
+      this.foodPos = this.coordinates.findIndex((c, i) => !this.snakePos.includes(i)) || this.noFoodPos;
     }
 
     this.ctx.fillStyle = 'red';
-    if (this.foodPos.x >= 0 && this.foodPos.y >= 0) {
-      this.ctx.fillRect(this.foodPos.x, this.foodPos.y, this.getSnakeSize(), this.getSnakeSize());
+    if (this.foodPos >= 0) {
+      const coordinate = this.getCoordinateByIndex(this.foodPos);
+      this.ctx.fillRect(coordinate.x, coordinate.y, this.getSnakeSize(), this.getSnakeSize());
     }
   }
 
@@ -259,8 +247,8 @@ class Renderer {
   }
 
   private eat() {
-    const { x: headX, y: headY } = this.getSneakHead();
-    const gotFood = headX === this.foodPos.x && headY === this.foodPos.y;
+    const headCoordinateIndex = this.getSneakHead();
+    const gotFood = headCoordinateIndex === this.foodPos;
 
     if (gotFood) {
       this.foodPos = this.noFoodPos;
@@ -269,16 +257,12 @@ class Renderer {
     return gotFood;
   }
 
-  private coordinatesIncludes(coordinates: Position[], position: Position) {
-    return !!coordinates.find(c => c.x === position.x && c.y === position.y)
+  private snakeIncludesCoordinateIndex(index: number) {
+    return this.snakePos.includes(index);
   }
 
-  private snakeIncludesCoordinates(pos: Position) {
-    return this.coordinatesIncludes(this.snakePos, pos);
-  }
-
-  private playFieldIncludesCoordinates(pos: Position) {
-    return this.coordinatesIncludes(this.coordinates, pos);
+  private playFieldIncludesCoordinateIndex(index: number) {
+    return !!this.coordinates[index];
   }
 
   private getSnakeSize() {
@@ -289,18 +273,18 @@ class Renderer {
     const snakeSize = this.getSnakeSize();
 
     if (this.firstRender) {
-      console.log(this.coordinates);
-      this.snakePos.push(this.coordinates[1]);
+      this.snakePos.push(1);
     }
 
-    const { x: headX, y: headY } = this.getSneakHead();
-
+    const headCoordinateIndex = this.getSneakHead();
+    const { x: headX, y: headY } = this.getCoordinateByIndex(headCoordinateIndex);
 
     this.snakePos.forEach((pos, i) => {
       this.ctx.fillStyle = i === this.snakePos.length - 1 ? 'lime' : 'darkgreen';
       this.ctx.strokeStyle = 'black';
-      this.ctx.fillRect(pos.x, pos.y, snakeSize, snakeSize);
-      this.ctx.strokeRect(pos.x + 1, pos.y + 1, snakeSize - 1, snakeSize - 1);
+      const coordinate = this.getCoordinateByIndex(pos);
+      this.ctx.fillRect(coordinate.x, coordinate.y, snakeSize, snakeSize);
+      this.ctx.strokeRect(coordinate.x + 1, coordinate.y + 1, snakeSize - 1, snakeSize - 1);
     });
 
     const latestKey = this.keysPressed.pop();
@@ -330,9 +314,11 @@ class Renderer {
     const nextPos = { x: headX, y: headY };
     const movementAmount = snakeSize;
 
-    const moveTo = (pos: Position) => {
-      if (!this.snakeIncludesCoordinates(pos) && this.playFieldIncludesCoordinates(pos)) {
-        this.snakePos.push(pos);
+    const moveTo = (position: Position) => {
+      const posIndex = this.getCoordinateIndex(position);
+
+      if (!this.snakeIncludesCoordinateIndex(posIndex) && this.playFieldIncludesCoordinateIndex(posIndex)) {
+        this.snakePos.push(posIndex);
         if (!this.eat()) {
           this.snakePos.shift();
         }
