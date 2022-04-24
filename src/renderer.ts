@@ -38,6 +38,8 @@ class Renderer {
   private blockAmount = 128;
   private playFieldWidth = 0;
   private blockSize = 0;
+  private fontSize = 18;
+
 
   private coordinates: Position[] = [];
 
@@ -92,6 +94,7 @@ class Renderer {
     this.drawCoordinates();
     this.snake();
     this.food();
+    this.displayScore();
 
     if (this.firstRender) {
       this.firstRender = false;
@@ -124,6 +127,13 @@ class Renderer {
       this.playFieldWidth + lineWidth + 1,
       this.playFieldWidth + lineWidth + 1
     );
+  }
+
+  private getTextRowHeight() {
+    return {
+      up: this.fontSize * 2,
+      down: this.boundaries.yEnd + this.fontSize * 2
+    }
   }
 
   private drawCoordinates() {
@@ -176,6 +186,15 @@ class Renderer {
     }
   }
 
+  private getFont() {
+    return `${this.fontSize}px arial`;
+  }
+
+  private setFont() {
+    this.ctx.fillStyle = 'white';
+    this.ctx.font = this.getFont();
+  }
+
   private displayFPS() {
     this.fpsArr[this.intervalPos] = this.fps;
     this.deltaArr[this.intervalPos] = this.delta;
@@ -183,12 +202,21 @@ class Renderer {
     this.avgFps = Math.round(this.fpsArr.reduce((a, b) => a + b, 0) / this.fpsArr.length);
     this.avgDelta = Math.round(this.deltaArr.reduce((a, b) => a + b, 0) / this.deltaArr.length);
 
-    const fontSize = 18;
-    const double = fontSize * 2;
-    this.ctx.fillStyle = 'white';
-    this.ctx.font = `${fontSize}px arial`;
-    this.ctx.fillText(`score: ${this.snakePos.length - 1}`, this.boundaries.xStart, 0 + double);
+    this.setFont();
     this.ctx.textAlign = 'right';
+    const { up } = this.getTextRowHeight();
+
+    const text = `fps: ${this.avgFps} delta: ${this.avgDelta}`;
+    this.ctx.fillText(text, this.boundaries.xEnd, up);
+  }
+
+  private displayScore() {
+    this.setFont();
+    this.ctx.textAlign = 'left';
+    const { up } = this.getTextRowHeight();
+
+    const text = `score: ${this.snakePos.length - 1}`;
+    this.ctx.fillText(text, this.boundaries.xStart, up);
   }
 
   private getCoordinateIndex = (position: Position) => {
