@@ -6,6 +6,8 @@ declare global { interface Window { electron: Electron; } };
 type Position = { x: number; y: number };
 type Direction = 'l' | 'r' | 'u' | 'd';
 
+type SnakeDirection = Direction | undefined;
+
 class Renderer {
   private canvas: Canvas;
   private ctx: CanvasRenderingContext2D;
@@ -32,14 +34,12 @@ class Renderer {
 
   private snakePos: number[] = [];
 
-  private snakeDir: Direction = 'r';
+  private snakeDir: SnakeDirection = undefined;
   private snakeSize = 4;
 
   private blockAmount = 128;
   private playFieldWidth = 0;
   private blockSize = 0;
-  private fontSize = 18;
-
 
   private coordinates: Position[] = [];
 
@@ -101,16 +101,20 @@ class Renderer {
     }
   }
 
-  private calculatePlayArea() {
-    const smallerSide = this.width <= this.height ? this.width : this.height;
-    const sideLength = Math.floor(smallerSide);
-    const margin = Math.floor(smallerSide * 0.1);
+  private getSmallerWindowSide() {
+    return this.width <= this.height ? this.width : this.height;
+  }
 
-    this.playFieldWidth = Math.round(sideLength - margin * 2);
+  private calculatePlayArea() {
+    const windowSmallerSide = this.getSmallerWindowSide();
+    const windowSideLength = Math.floor(windowSmallerSide);
+    const margin = Math.floor(this.getFOntSize() + windowSmallerSide * 0.1);
+
+    this.playFieldWidth = Math.round(windowSideLength - margin * 2);
     this.blockSize = this.playFieldWidth / this.blockAmount;
 
-    this.boundaries.xStart = (this.width - sideLength) / 2 + margin;
-    this.boundaries.yStart = (this.height - sideLength) / 2 + margin;
+    this.boundaries.xStart = (this.width - windowSideLength) / 2 + margin;
+    this.boundaries.yStart = (this.height - windowSideLength) / 2 + margin;
     this.boundaries.xEnd = this.boundaries.xStart + this.playFieldWidth;
     this.boundaries.yEnd = this.boundaries.yStart + this.playFieldWidth;
   }
@@ -129,10 +133,18 @@ class Renderer {
     );
   }
 
+  private getFOntSize() {
+    const smallerSide = this.getSmallerWindowSide();
+    const windowBased = smallerSide / 25;
+    const min = 10;
+
+    return windowBased > min ? windowBased : min;
+  }
+
   private getTextRowHeight() {
     return {
-      up: this.fontSize * 2,
-      down: this.boundaries.yEnd + this.fontSize * 2
+      up: this.getFOntSize() * 2,
+      down: this.boundaries.yEnd + this.getFOntSize() * 2
     }
   }
 
@@ -187,7 +199,7 @@ class Renderer {
   }
 
   private getFont() {
-    return `${this.fontSize}px arial`;
+    return `${this.getFOntSize()}px arial`;
   }
 
   private setFont() {
@@ -381,7 +393,7 @@ class Renderer {
       this.snakeDir = 'r'
     }
 
-    if (this.elapsedDelta >= this.tickRate) {
+    if (this.elapsedDelta >= this.tickRate && !!this.snakeDir) {
       const nextPos = this.getSnakeNextPos(this.snakeDir);
       moveTo(nextPos);
     }
