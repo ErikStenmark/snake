@@ -1,0 +1,23 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100vh;
+  gap: 10px;
+}
+
+.root button {
+  font-family: 'PressStart2P';
+  border: 0;
+  font-size: small;
+  background-color: transparent;
+  color: aqua;
+  cursor: pointer;
+  outline: none;
+}
+
+.root button.active {
+  color: rgb(255, 0, 191) !important;
+}

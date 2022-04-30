@@ -1,7 +1,10 @@
 import React from 'react';
 import Main from './game/main';
-import './App.css';
-import classNames from 'classnames';
+import MainMenu from './components/main-menu';
+import { GameContext } from '.';
+import Score from './components/score';
+import PauseMenu from './components/pause-menu';
+import './style/app.css';
 
 type AppProps = {
   main: Main;
@@ -16,17 +19,22 @@ const App: React.FC<AppProps> = ({ main }) => {
 
   React.useEffect(() => {
     const keyListener = (e: KeyboardEvent) => {
+      e.preventDefault();
       if (e.key === 'p' && gameOn) {
         setPaused(main.pause() as boolean);
+      }
+
+      if (e.key === 'Escape' && gameOn) {
+        setGameOn(false);
       }
     }
 
     main.setDataCB(setGameData);
-    window.addEventListener('keypress', keyListener);
+    window.addEventListener('keydown', keyListener);
 
     return () => {
       main.setDataCB(() => { });
-      window.removeEventListener('keypress', keyListener)
+      window.removeEventListener('keydown', keyListener)
     };
 
   }, [main, gameOn]);
@@ -39,27 +47,20 @@ const App: React.FC<AppProps> = ({ main }) => {
 
     if (!gameOn && running && !!main) {
       setRunning(false);
+      setPaused(false);
       main.end();
     }
 
   }, [gameOn, running, main]);
 
-  const headerClass = classNames('App-header', {
-    ['center']: !gameOn
-  })
-
   return (
-    <div className="App">
-      <header className={headerClass}>
-        <button onClick={() => setGameOn(!gameOn)}>{gameOn ? 'end' : 'play'}</button>
-        {gameOn &&
-          <button onClick={() => setPaused(main.pause() as boolean)}>{paused ? 'continue' : 'pause'}</button>
-        }
-        {gameOn &&
-          <p> {`score: ${!!gameData?.score ? gameData?.score : 0}`}</p>
-        }
-      </header>
-    </div >
+    <GameContext.Provider value={{ data: gameData, game: main, setGameOn }}>
+      <div className="App">
+        {!gameOn && <MainMenu />}
+        {gameOn && <Score />}
+        {paused && <PauseMenu />}
+      </div >
+    </GameContext.Provider>
   );
 }
 

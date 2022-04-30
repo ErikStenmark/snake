@@ -1,15 +1,27 @@
-import React from 'react';
+import React, { createContext } from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
+import App from './app';
 import reportWebVitals from './reportWebVitals';
 import Main from './game/main';
+import './style/index.css';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
 const main = new Main();
+
+type GameContextProps = {
+  data: { [key: string]: any }
+  game: Main,
+  setGameOn: (on: boolean) => void;
+}
+
+export const GameContext = createContext<GameContextProps>({
+  data: {},
+  game: main,
+  setGameOn: () => { }
+});
 
 root.render(
   <React.StrictMode>

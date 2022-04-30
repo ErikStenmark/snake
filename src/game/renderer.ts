@@ -132,7 +132,7 @@ class Renderer {
   private calculatePlayArea() {
     const windowSmallerSide = this.getSmallerWindowSide();
     const windowSideLength = Math.floor(windowSmallerSide);
-    const margin = Math.floor(this.getFOntSize() + windowSmallerSide * 0.1);
+    const margin = Math.floor(this.getFontSize() + windowSmallerSide * 0.1);
 
     this.playFieldWidth = Math.round(windowSideLength - margin * 2);
     this.blockSize = this.playFieldWidth / this.blockAmount;
@@ -157,7 +157,7 @@ class Renderer {
     );
   }
 
-  private getFOntSize() {
+  private getFontSize() {
     const smallerSide = this.getSmallerWindowSide();
     const windowBased = smallerSide / 25;
     const min = 10;
@@ -167,8 +167,8 @@ class Renderer {
 
   private getTextRowHeight() {
     return {
-      up: this.getFOntSize() * 2,
-      down: this.boundaries.yEnd + this.getFOntSize() * 2
+      up: this.getFontSize() * 2,
+      down: this.boundaries.yEnd + this.getFontSize() * 2
     }
   }
 
@@ -223,7 +223,7 @@ class Renderer {
   }
 
   private getFont() {
-    return `${this.getFOntSize()}px arial`;
+    return `${this.getFontSize()}px arial`;
   }
 
   private setFont() {

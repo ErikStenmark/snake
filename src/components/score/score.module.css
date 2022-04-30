@@ -1,0 +1,10 @@
+.root {
+  position: absolute;
+  color: aqua;
+  z-index: 10;
+  text-align: center;
+  width: 100%;
+  top: 5vh;
+  font-family: 'PressStart2P';
+  font-size: 4vh;
+}
