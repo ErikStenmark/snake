@@ -1,5 +1,7 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import electronReload from 'electron-reload';
+import isDev from 'electron-is-dev';
+import path from 'path';
 
 electronReload(__dirname, {});
 
@@ -20,8 +22,14 @@ const createWindow = (): void => {
     show: false,
   });
 
+  mainWindow.loadURL(
+    isDev
+      ? 'http://localhost:3000'
+      : `file://${path.join(__dirname, '../build/index.html')}`
+  );
+
   mainWindow.setFullScreenable(true);
-  mainWindow.loadFile("./public/index.html");
+  // mainWindow.loadFile("./public/index.html");
   mainWindow.on("ready-to-show", () => mainWindow.show());
 }
 

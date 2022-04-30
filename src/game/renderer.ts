@@ -44,6 +44,9 @@ class Renderer {
   private coordinates: Position[] = [];
 
   private firstRender = true;
+  private isPaused = false;
+
+  private dataCB: (...args: any) => void = () => { }
 
   private boundaries = {
     xStart: 0,
@@ -61,22 +64,26 @@ class Renderer {
     this.lastFrameTime = new Date().getTime();
 
     this.setSize();
-    window.addEventListener('resize', () => {
-      this.setSize();
-      this.calculatePlayArea();
-      this.getAllCoordinates();
-    });
 
-    window.addEventListener('keydown', e => {
-      if (!this.keysPressed.includes(e.key)) {
-        this.keysPressed.push(e.key);
-      }
-    });
-
-    window.addEventListener('keyup', e => {
-      this.keysPressed = this.keysPressed.filter(k => k !== e.key);
-    });
+    window.addEventListener('resize', this.resizeCB);
+    window.addEventListener('keydown', this.keyDownCB);
+    window.addEventListener('keyup', e => this.keyUpCB);
   }
+
+  private keyDownCB = (e: KeyboardEvent) => {
+    if (!this.keysPressed.includes(e.key)) {
+      this.keysPressed.push(e.key);
+    }
+  }
+
+  private resizeCB = () => {
+    this.setSize();
+    this.calculatePlayArea();
+    this.getAllCoordinates();
+  }
+
+  private keyUpCB = (e: KeyboardEvent) => this.keysPressed = this.keysPressed.filter(k => k !== e.key);
+
 
   public onUpdate() {
     this.calculateTime();
@@ -94,11 +101,28 @@ class Renderer {
     this.drawCoordinates();
     this.snake();
     this.food();
-    this.displayScore();
+    // this.displayScore();
 
     if (this.firstRender) {
       this.firstRender = false;
     }
+  }
+
+  public setDataCB(cb: (...args: any) => void) {
+    this.dataCB = cb;
+    this.dataCB({ score: !!this.snakePos.length ? this.snakePos.length - 1 : 0 });
+  }
+
+  public endGame() {
+    window.removeEventListener('keyup', this.keyUpCB);
+    window.removeEventListener('keydown', this.keyDownCB);
+    window.removeEventListener('reset', this.resizeCB);
+    this.canvas.removeCanvas();
+  }
+
+  public pause() {
+    this.isPaused = !this.isPaused;
+    return this.isPaused;
   }
 
   private getSmallerWindowSide() {
@@ -216,10 +240,10 @@ class Renderer {
 
     this.setFont();
     this.ctx.textAlign = 'right';
-    const { up } = this.getTextRowHeight();
+    const { down } = this.getTextRowHeight();
 
     const text = `fps: ${this.avgFps} delta: ${this.avgDelta}`;
-    this.ctx.fillText(text, this.boundaries.xEnd, up);
+    this.ctx.fillText(text, this.boundaries.xEnd, down);
   }
 
   private displayScore() {
@@ -298,6 +322,7 @@ class Renderer {
     const gotFood = headCoordinateIndex === this.foodPos;
 
     if (gotFood) {
+      this.dataCB({ score: this.snakePos.length - 1 });
       this.foodPos = this.noFoodPos;
     }
 
@@ -346,12 +371,14 @@ class Renderer {
     const snakeSize = this.getSnakeSize();
 
     const moveTo = (position: Position) => {
-      const posIndex = this.getCoordinateIndex(position);
+      if (!this.isPaused) {
+        const posIndex = this.getCoordinateIndex(position);
 
-      if (!this.snakeIncludesCoordinateIndex(posIndex) && this.playFieldIncludesCoordinateIndex(posIndex)) {
-        this.snakePos.push(posIndex);
-        if (!this.eat()) {
-          this.snakePos.shift();
+        if (!this.snakeIncludesCoordinateIndex(posIndex) && this.playFieldIncludesCoordinateIndex(posIndex)) {
+          this.snakePos.push(posIndex);
+          if (!this.eat()) {
+            this.snakePos.shift();
+          }
         }
       }
     }
