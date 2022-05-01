@@ -4,7 +4,7 @@ import App from './app';
 import Main from './game/main';
 
 test('renders learn react link', () => {
-  render(<App main={new Main()} />);
+  render(<App game={new Main()} />);
   const linkElement = screen.getByText(/learn react/i);
   expect(linkElement).toBeInTheDocument();
 });

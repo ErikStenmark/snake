@@ -11,21 +11,27 @@ const root = ReactDOM.createRoot(
 
 const main = new Main();
 
-type GameContextProps = {
+export type GameContextProps = {
   data: { [key: string]: any }
   game: Main,
+  isRunning: boolean;
+  isPaused: boolean;
   setGameOn: (on: boolean) => void;
+  togglePause: () => void;
 }
 
 export const GameContext = createContext<GameContextProps>({
   data: {},
   game: main,
-  setGameOn: () => { }
+  isRunning: false,
+  isPaused: false,
+  setGameOn: () => { },
+  togglePause: () => { }
 });
 
 root.render(
   <React.StrictMode>
-    <App main={main} />
+    <App game={main} />
   </React.StrictMode>
 );
 

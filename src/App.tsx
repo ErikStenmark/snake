@@ -1,64 +1,45 @@
 import React from 'react';
+
 import Main from './game/main';
 import MainMenu from './components/main-menu';
-import { GameContext } from '.';
 import Score from './components/score';
 import PauseMenu from './components/pause-menu';
+import useGameControls from './hooks/use-game-controls';
+import useGameData from './hooks/use-game-data';
+import useGameRunner from './hooks/use-game-runner';
+import usePause from './hooks/use-pause';
+
+import { GameContext, GameContextProps } from '.';
 import './style/app.css';
 
 type AppProps = {
-  main: Main;
+  game: Main;
 }
 
-const App: React.FC<AppProps> = ({ main }) => {
-
+const App: React.FC<AppProps> = ({ game }) => {
   const [gameOn, setGameOn] = React.useState(false);
-  const [running, setRunning] = React.useState(false);
-  const [paused, setPaused] = React.useState(false);
-  const [gameData, setGameData] = React.useState<any>({});
+  const data = useGameData(game);
 
-  React.useEffect(() => {
-    const keyListener = (e: KeyboardEvent) => {
-      e.preventDefault();
-      if (e.key === 'p' && gameOn) {
-        setPaused(main.pause() as boolean);
-      }
+  const isRunning = useGameRunner(gameOn, game);
+  const [isPaused, togglePause] = usePause(game, isRunning);
 
-      if (e.key === 'Escape' && gameOn) {
-        setGameOn(false);
-      }
-    }
+  const context: GameContextProps = {
+    data,
+    game,
+    isRunning,
+    isPaused,
+    setGameOn,
+    togglePause
+  }
 
-    main.setDataCB(setGameData);
-    window.addEventListener('keydown', keyListener);
-
-    return () => {
-      main.setDataCB(() => { });
-      window.removeEventListener('keydown', keyListener)
-    };
-
-  }, [main, gameOn]);
-
-  React.useEffect(() => {
-    if (gameOn && !running) {
-      setRunning(true);
-      main.run();
-    }
-
-    if (!gameOn && running && !!main) {
-      setRunning(false);
-      setPaused(false);
-      main.end();
-    }
-
-  }, [gameOn, running, main]);
+  useGameControls(context);
 
   return (
-    <GameContext.Provider value={{ data: gameData, game: main, setGameOn }}>
+    <GameContext.Provider value={context}>
       <div className="App">
-        {!gameOn && <MainMenu />}
-        {gameOn && <Score />}
-        {paused && <PauseMenu />}
+        <MainMenu />
+        <Score />
+        <PauseMenu />
       </div >
     </GameContext.Provider>
   );
