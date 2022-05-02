@@ -21,3 +21,11 @@
 .root button.active {
   color: rgb(255, 0, 191) !important;
 }
+
+.root button.selected::before {
+  content: "-> ";
+}
+
+.root button.selected::after {
+  content: " <-";
+}

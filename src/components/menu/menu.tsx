@@ -1,21 +1,24 @@
 import React from 'react';
 import style from './menu.module.css';
+import classNames from 'classnames';
 
 export type MenuItem = {
   name: string;
   action: () => void;
+  selected?: boolean
 }
 
-export type MenuProps = {
+export type MenuProps = React.HTMLAttributes<HTMLDivElement> & {
   items: MenuItem[];
+  onExit?: (() => void) | null | undefined;
 }
 
-const Menu: React.FC<MenuProps> = ({ items }) => {
-
+const Menu: React.FC<MenuProps> = ({ items, onExit, children, className, ...rest }) => {
   const [activeItem, setActiveItem] = React.useState<MenuItem>(items[0]);
-  const getItemIndex = () => items.findIndex(item => item.name === activeItem.name);
 
   React.useEffect(() => {
+    const getItemIndex = () => items.findIndex(item => item.name === activeItem.name);
+
     const keyListener = (e: KeyboardEvent) => {
       const indexAmount = items.length - 1;
       const currentIndex = getItemIndex();
@@ -31,23 +34,40 @@ const Menu: React.FC<MenuProps> = ({ items }) => {
       if (e.key === 'Enter') {
         activeItem.action();
       }
+
+      if (e.key === 'Escape' && !!onExit) {
+        onExit();
+      }
     }
 
     window.addEventListener('keydown', keyListener);
     return () => {
       window.removeEventListener('keydown', keyListener);
     }
-  }, [activeItem, items, getItemIndex]);
+  }, [activeItem, items, onExit]);
+
+  React.useEffect(() => {
+    const selected = items.find(item => item.selected);
+    setActiveItem(!!selected ? selected : items[0]);
+  }, [items, setActiveItem]);
 
   return (
-    <div className={style.root}>
-      {items.map(item => <button
-        key={`menu-item-${item.name}`}
-        className={activeItem.name === item.name ? style.active : ''}
-      >{
-          item.name}
-      </button>
-      )}
+    <div {...rest} className={classNames(style.root, className)}>
+      {children}
+      {items.map(item => {
+
+        const classProp = classNames({
+          [style.active]: activeItem.name === item.name,
+          [style.selected]: item.selected
+        })
+
+        return (
+          <button key={`menu-item-${item.name}`} className={classProp}>
+            {item.name}
+          </button>
+        );
+
+      })}
     </div>
   );
 }

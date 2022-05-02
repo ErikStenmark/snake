@@ -46,6 +46,8 @@ class Renderer {
   private firstRender = true;
   private isPaused = false;
 
+  private options: any = {};
+
   private dataCB: (...args: any) => void = () => { }
 
   private boundaries = {
@@ -84,6 +86,9 @@ class Renderer {
 
   private keyUpCB = (e: KeyboardEvent) => this.keysPressed = this.keysPressed.filter(k => k !== e.key);
 
+  public setOptions(options: any) {
+    this.options = options;
+  }
 
   public onUpdate() {
     this.calculateTime();
@@ -101,7 +106,6 @@ class Renderer {
     this.drawCoordinates();
     this.snake();
     this.food();
-    // this.displayScore();
 
     if (this.firstRender) {
       this.firstRender = false;
@@ -244,15 +248,6 @@ class Renderer {
 
     const text = `fps: ${this.avgFps} delta: ${this.avgDelta}`;
     this.ctx.fillText(text, this.boundaries.xEnd, down);
-  }
-
-  private displayScore() {
-    this.setFont();
-    this.ctx.textAlign = 'left';
-    const { up } = this.getTextRowHeight();
-
-    const text = `score: ${this.snakePos.length - 1}`;
-    this.ctx.fillText(text, this.boundaries.xStart, up);
   }
 
   private getCoordinateIndex = (position: Position) => {
