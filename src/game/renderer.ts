@@ -1,5 +1,6 @@
 import { Electron } from './preload';
 import Canvas from './canvas';
+import { defaultGameOpts, GameOptions, GameOptSize, GameOptSpeed } from '../components/main-menu';
 
 declare global { interface Window { electron: Electron; } };
 
@@ -46,7 +47,7 @@ class Renderer {
   private firstRender = true;
   private isPaused = false;
 
-  private options: any = {};
+  private options: GameOptions = defaultGameOpts;
 
   private dataCB: (...args: any) => void = () => { }
 
@@ -91,11 +92,19 @@ class Renderer {
   }
 
   public onUpdate() {
+    if (this.firstRender) {
+      this.getOptions();
+    }
+
     this.calculateTime();
     this.updateInterval();
 
     this.canvas.fill();
-    this.displayFPS();
+
+    if (this.options.fps === 'on') {
+      this.displayFPS();
+    }
+
     this.drawPlayField();
 
     if (this.firstRender) {
@@ -115,6 +124,22 @@ class Renderer {
   public setDataCB(cb: (...args: any) => void) {
     this.dataCB = cb;
     this.dataCB({ score: !!this.snakePos.length ? this.snakePos.length - 1 : 0 });
+  }
+
+  private getOptions() {
+    const sizeMap: { [key in GameOptSize]: number } = {
+      large: 1,
+      medium: 2,
+      small: 4
+    }
+    this.blockAmount = this.blockAmount / sizeMap[this.options.size];
+
+    const speedMap: { [key in GameOptSpeed]: number } = {
+      fast: 1,
+      medium: 3,
+      slow: 6
+    }
+    this.tickRate = this.tickRate * speedMap[this.options.speed];
   }
 
   public endGame() {

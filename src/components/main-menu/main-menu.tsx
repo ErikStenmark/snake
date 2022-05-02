@@ -3,15 +3,31 @@ import { GameContext } from '../..';
 import Heading, { HeadingSize } from '../heading';
 import Menu, { MenuItem } from '../menu';
 
+type GameOptSwitch = 'on' | 'off';
+export type GameOptSpeed = 'slow' | 'medium' | 'fast';
+export type GameOptSize = 'small' | 'medium' | 'large';
+export type GameOptWalls = GameOptSwitch;
+export type GameOptFPS = GameOptSwitch;
+
+export type GameOptions = {
+  size: GameOptSize;
+  speed: GameOptSpeed;
+  walls: GameOptWalls;
+  fps: GameOptFPS;
+}
+
+export const defaultGameOpts: GameOptions = {
+  size: 'large',
+  speed: 'fast',
+  walls: 'on',
+  fps: 'off'
+}
+
 const MainMenu: React.FC = () => {
   const { isRunning, setGameOn, game } = React.useContext(GameContext);
   const [screen, setScreen] = React.useState('main');
 
-  const [options, setOptions] = React.useState({
-    size: 'large',
-    walls: 'on',
-    speed: 'fast'
-  });
+  const [options, setOptions] = React.useState<GameOptions>(defaultGameOpts);
 
   if (isRunning) {
     return null;
@@ -19,53 +35,75 @@ const MainMenu: React.FC = () => {
 
   game.setOptions(options);
 
+  const setScreenAction = (screen: string) => () => setScreen(screen);
+
   const menuItems: MenuItem[] = [
     { name: 'play', action: () => setGameOn(true) },
-    { name: 'options', action: () => setScreen('options') }
+    { name: 'options', action: setScreenAction('options') }
   ];
 
   const optionsItems: MenuItem[] = [
-    { name: 'size', action: () => { setScreen('size') } },
-    { name: 'walls', action: () => { setScreen('walls') } },
-    { name: 'speed', action: () => { setScreen('speed') } }
+    { name: 'size', action: setScreenAction('size') },
+    { name: 'walls', action: setScreenAction('walls') },
+    { name: 'speed', action: setScreenAction('speed') },
+    { name: 'fps', action: setScreenAction('fps') }
   ];
+
+  const isSize = (size: GameOptSize) => options.size === size;
+  const setSize = (size: GameOptSize) => () => setOptions({ ...options, size });
 
   const sizeOptions: MenuItem[] = [
-    { name: 'small', selected: options.size === 'small', action: () => { setOptions({ ...options, size: 'small' }) } },
-    { name: 'medium', selected: options.size === 'medium', action: () => { setOptions({ ...options, size: 'medium' }) } },
-    { name: 'large', selected: options.size === 'large', action: () => { setOptions({ ...options, size: 'large' }) } }
+    { name: 'small', selected: isSize('small'), action: setSize('small') },
+    { name: 'medium', selected: isSize('medium'), action: setSize('medium') },
+    { name: 'large', selected: isSize('large'), action: setSize('large') }
   ];
+
+  const isWalls = (walls: GameOptSwitch) => options.walls === walls;
+  const setWalls = (walls: GameOptSwitch) => () => setOptions({ ...options, walls });
 
   const wallsOptions: MenuItem[] = [
-    { name: 'on', selected: options.walls === 'on', action: () => { setOptions({ ...options, walls: 'on' }) } },
-    { name: 'off', selected: options.walls === 'off', action: () => { setOptions({ ...options, walls: 'off' }) } }
+    { name: 'on', selected: isWalls('on'), action: setWalls('on') },
+    { name: 'off', selected: isWalls('off'), action: setWalls('off') }
   ];
 
+  const isFps = (fps: GameOptSwitch) => options.fps === fps;
+  const setFps = (fps: GameOptSwitch) => () => setOptions({ ...options, fps });
+
+  const fpsOptions: MenuItem[] = [
+    { name: 'on', selected: isFps('on'), action: setFps('on') },
+    { name: 'off', selected: isFps('off'), action: setFps('off') }
+  ]
+
+  const isSpeed = (speed: GameOptSpeed) => options.speed === speed;
+  const setSpeed = (speed: GameOptSpeed) => () => setOptions({ ...options, speed });
+
   const speedOptions: MenuItem[] = [
-    { name: 'slow', selected: options.speed === 'slow', action: () => { setOptions({ ...options, speed: 'slow' }) } },
-    { name: 'medium', selected: options.speed === 'medium', action: () => { setOptions({ ...options, speed: 'medium' }) } },
-    { name: 'fast', selected: options.speed === 'fast', action: () => { setOptions({ ...options, speed: 'fast' }) } }
+    { name: 'slow', selected: isSpeed('slow'), action: setSpeed('slow') },
+    { name: 'medium', selected: isSpeed('medium'), action: setSpeed('medium') },
+    { name: 'fast', selected: isSpeed('fast'), action: setSpeed('fast') }
   ];
 
   const screens: { [key: string]: { onExit: () => void, items: MenuItem[] } } = {
     main: { items: menuItems, onExit: () => { } },
-    options: { items: optionsItems, onExit: () => { setScreen('main') } },
-    size: { items: sizeOptions, onExit: () => { setScreen('options') } },
-    walls: { items: wallsOptions, onExit: () => { setScreen('options') } },
-    speed: { items: speedOptions, onExit: () => { setScreen('options') } }
+    options: { items: optionsItems, onExit: setScreenAction('main') },
+    size: { items: sizeOptions, onExit: setScreenAction('options') },
+    walls: { items: wallsOptions, onExit: setScreenAction('options') },
+    speed: { items: speedOptions, onExit: setScreenAction('options') },
+    fps: { items: fpsOptions, onExit: setScreenAction('options') }
   }
 
-  const isMain = screen === 'main';
   const title = 'snake'
+  const isMain = screen === 'main';
+  const size = isMain ? HeadingSize.LARGE : HeadingSize.SMALL;
+  const headingText = isMain ? title : screen;
+  const currentScreen = screens[screen];
 
   return (
-    <>
-      <Menu items={screens[screen].items} onExit={screens[screen].onExit}>
-        <Heading style={{ margin: '15px' }} size={isMain ? HeadingSize.LARGE : HeadingSize.SMALL}>
-          {isMain ? title : screen}
-        </Heading>
-      </Menu>
-    </>
+    <Menu items={currentScreen.items} onExit={currentScreen.onExit}>
+      <Heading style={{ margin: '15px' }} size={size}>
+        {headingText}
+      </Heading>
+    </Menu>
   );
 
 };
