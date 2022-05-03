@@ -2,13 +2,13 @@ import React from 'react';
 import { GameContextProps } from '..';
 
 const useGameControls = (props: GameContextProps) => {
-  const { setGameOn, togglePause, isRunning } = props;
+  const { setGameOn, togglePause, isRunning, isPaused } = props;
 
   React.useEffect(() => {
     const keyListener = (e: KeyboardEvent) => {
       e.preventDefault();
 
-      if (e.key === 'p' && isRunning) {
+      if (isPaused || (e.key === 'p' && isRunning)) {
         togglePause();
       }
 
@@ -22,7 +22,7 @@ const useGameControls = (props: GameContextProps) => {
       window.removeEventListener('keydown', keyListener)
     };
 
-  }, [isRunning, setGameOn, togglePause]);
+  }, [isRunning, isPaused, setGameOn, togglePause]);
 }
 
 export default useGameControls;

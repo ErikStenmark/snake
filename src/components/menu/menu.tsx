@@ -23,12 +23,12 @@ const Menu: React.FC<MenuProps> = ({ items, onExit, children, className, ...rest
       const indexAmount = items.length - 1;
       const currentIndex = getItemIndex();
 
-      if (e.key === 'ArrowDown' && currentIndex < indexAmount) {
-        setActiveItem(items[currentIndex + 1]);
+      if (e.key === 'ArrowDown') {
+        setActiveItem(items[currentIndex < indexAmount ? currentIndex + 1 : 0]);
       }
 
-      if (e.key === 'ArrowUp' && currentIndex > 0) {
-        setActiveItem(items[currentIndex - 1]);
+      if (e.key === 'ArrowUp') {
+        setActiveItem(items[currentIndex > 0 ? currentIndex - 1 : items.length - 1]);
       }
 
       if (e.key === 'Enter') {

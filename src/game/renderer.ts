@@ -350,7 +350,7 @@ class Renderer {
   }
 
   private snakeIncludesCoordinateIndex(index: number) {
-    return this.snakePos.includes(index);
+    return this.snakePos.slice(1, this.snakePos.length - 1).includes(index);
   }
 
   private playFieldIncludesCoordinateIndex(index: number) {
@@ -387,12 +387,47 @@ class Renderer {
     return nextPos;
   }
 
+  private teleportIfNeeded(position: Position): Position {
+    if (this.options.walls === 'on') {
+      return position;
+    }
+
+    let { x, y } = position;
+    const { xStart, xEnd, yStart, yEnd } = this.boundaries;
+    const headIndex = this.getSneakHeadCoordinateIndex();
+
+    if (x >= xEnd) {
+      const newIndex = this.getCoordinateByIndex(headIndex - ((this.blockAmount / 4) - 1));
+      x = newIndex.x;
+    }
+
+    if (x < xStart) {
+      const newIndex = this.getCoordinateByIndex(headIndex + ((this.blockAmount / 4) - 1));
+      x = newIndex.x;
+    }
+
+    if (y >= yEnd) {
+      const rowBlocks = (this.blockAmount / 4) - 1;
+      const newIndex = this.getCoordinateByIndex(headIndex - ((rowBlocks * rowBlocks) + rowBlocks));
+      y = newIndex.y;
+    }
+
+    if (y < yStart) {
+      const rowBlocks = (this.blockAmount / 4) - 1;
+      const newIndex = this.getCoordinateByIndex(headIndex + ((rowBlocks * rowBlocks) + rowBlocks));
+      y = newIndex.y;
+    }
+
+    return { x, y };
+  }
+
   private snake() {
     const snakeSize = this.getSnakeSize();
 
     const moveTo = (position: Position) => {
       if (!this.isPaused) {
-        const posIndex = this.getCoordinateIndex(position);
+        const warpedPos = this.teleportIfNeeded(position);
+        const posIndex = this.getCoordinateIndex(warpedPos);
 
         if (!this.snakeIncludesCoordinateIndex(posIndex) && this.playFieldIncludesCoordinateIndex(posIndex)) {
           this.snakePos.push(posIndex);
