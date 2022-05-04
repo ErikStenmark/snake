@@ -1,20 +1,21 @@
-import Renderer from './renderer';
+import Game from '../game';
 
-export default class Main {
-  private renderer: Renderer | null = null;
+export default class Engine {
+  private game: Game | null = null;
   private dataCB: () => void = () => { };
   private options: any = {};
+  private isRunning = false;
 
   public run() {
-    this.renderer = new Renderer();
-    this.renderer.setDataCB(this.dataCB);
-    this.renderer.setOptions(this.options);
+    this.game = new Game();
+    this.game.setDataCB(this.dataCB);
+    this.game.setOptions(this.options);
     this.isRunning = true;
 
     const loop = () => window.requestAnimationFrame(gameLoop);
 
     const gameLoop = () => {
-      this.renderer?.onUpdate();
+      this.game?.update();
 
       if (this.isRunning) {
         loop();
@@ -25,25 +26,23 @@ export default class Main {
   }
 
   public end() {
-    this.renderer?.endGame();
+    this.game?.endGame();
     this.isRunning = false;
-    this.renderer = null;
+    this.game = null;
   }
 
   public pause() {
-    return this.renderer?.pause();
+    return this.game?.togglePause();
   }
 
   public setDataCB(cb: (...args: any) => void) {
     this.dataCB = cb;
-    return this.renderer?.setDataCB(this.dataCB);
+    return this.game?.setDataCB(this.dataCB);
   }
 
   public setOptions(options: any) {
     this.options = options;
-    this.renderer?.setOptions(options);
+    this.game?.setOptions(options);
   }
-
-  private isRunning = false;
 
 }

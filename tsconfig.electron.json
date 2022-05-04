@@ -9,7 +9,7 @@
     "skipLibCheck": true
   },
   "include": [
-    "src/game/index.ts",
-    "src/game/preload.ts"
+    "src/electron/index.ts",
+    "src/electron/preload.ts"
   ]
 }

@@ -1,129 +1,74 @@
-import { Electron } from './preload';
-import Canvas from './canvas';
-import { defaultGameOpts, GameOptions, GameOptSize, GameOptSpeed } from '../components/main-menu';
 
-declare global { interface Window { electron: Electron; } };
+import Renderer from './engine/renderer';
+
+import {
+  defaultGameOpts,
+  GameOptions,
+  GameOptSize,
+  GameOptSpeed
+} from '../components/main-menu';
+
 
 type Position = { x: number; y: number };
 type Direction = 'l' | 'r' | 'u' | 'd';
 
 type SnakeDirection = Direction | undefined;
 
-class Renderer {
-  private canvas: Canvas;
-  private ctx: CanvasRenderingContext2D;
-
-  private width: number = 0;
-  private height: number = 0;
-
-  private maxInterval = 10;
-  private lastFrameTime: number;
-  private intervalPos: number = 0;
-
-  private fps: number = 0;
-  private avgFps: number = 0;
-  private fpsArr: number[] = [];
-
-  private delta: number = 0;
-  private avgDelta: number = 0;
-  private deltaArr: number[] = [];
-
-  private keysPressed: string[] = [];
-
+class Game extends Renderer {
   private tickRate = 20;
   private elapsedDelta: number = 0;
-
-  private snakePos: number[] = [];
-
-  private snakeDir: SnakeDirection = undefined;
-  private snakeSize = 4;
-
-  private blockAmount = 128;
-  private playFieldWidth = 0;
-  private blockSize = 0;
-
-  private coordinates: Position[] = [];
-
-  private firstRender = true;
-  private isPaused = false;
-
   private options: GameOptions = defaultGameOpts;
 
-  private dataCB: (...args: any) => void = () => { }
-
-  private boundaries = {
-    xStart: 0,
-    xEnd: 0,
-    yStart: 0,
-    yEnd: 0
-  }
+  private snakePos: number[] = [];
+  private snakeDir: SnakeDirection = undefined;
+  private snakeSize = 4;
 
   private noFoodPos: number = -1;
   private foodPos: number = this.noFoodPos;
 
-  constructor() {
-    this.canvas = new Canvas();
-    this.ctx = this.canvas.getCtx();
-    this.lastFrameTime = new Date().getTime();
+  private blockAmount = 128;
+  private blockSize = 0;
 
-    this.setSize();
+  private playFieldWidth = 0;
+  private boundaries = { xStart: 0, xEnd: 0, yStart: 0, yEnd: 0 }
+  private coordinates: Position[] = [];
 
-    window.addEventListener('resize', this.resizeCB);
-    window.addEventListener('keydown', this.keyDownCB);
-    window.addEventListener('keyup', e => this.keyUpCB);
-  }
-
-  private keyDownCB = (e: KeyboardEvent) => {
-    if (!this.keysPressed.includes(e.key)) {
-      this.keysPressed.push(e.key);
-    }
-  }
-
-  private resizeCB = () => {
-    this.setSize();
+  protected resize = () => {
     this.calculatePlayArea();
     this.getAllCoordinates();
   }
-
-  private keyUpCB = (e: KeyboardEvent) => this.keysPressed = this.keysPressed.filter(k => k !== e.key);
 
   public setOptions(options: any) {
     this.options = options;
   }
 
   public onUpdate() {
-    if (this.firstRender) {
+    if (this.getIsFirstRender()) {
       this.getOptions();
+      this.calculatePlayArea();
+      this.getAllCoordinates();
+      this.dataCB({ score: !!this.snakePos.length ? this.snakePos.length - 1 : 0 });
     }
-
-    this.calculateTime();
-    this.updateInterval();
-
-    this.canvas.fill();
 
     if (this.options.fps === 'on') {
       this.displayFPS();
     }
 
+    this.tick();
     this.drawPlayField();
-
-    if (this.firstRender) {
-      this.calculatePlayArea();
-      this.getAllCoordinates();
-    }
-
     this.drawCoordinates();
     this.snake();
     this.food();
 
-    if (this.firstRender) {
-      this.firstRender = false;
-    }
   }
 
-  public setDataCB(cb: (...args: any) => void) {
-    this.dataCB = cb;
-    this.dataCB({ score: !!this.snakePos.length ? this.snakePos.length - 1 : 0 });
+  private tick() {
+    const delta = this.getDelta();
+    if (this.elapsedDelta >= this.tickRate) {
+      this.elapsedDelta = 0;
+    };
+
+    this.elapsedDelta += delta;
   }
 
   private getOptions() {
@@ -142,23 +87,13 @@ class Renderer {
     this.tickRate = this.tickRate * speedMap[this.options.speed];
   }
 
-  public endGame() {
-    window.removeEventListener('keyup', this.keyUpCB);
-    window.removeEventListener('keydown', this.keyDownCB);
-    window.removeEventListener('reset', this.resizeCB);
-    this.canvas.removeCanvas();
-  }
-
-  public pause() {
-    this.isPaused = !this.isPaused;
-    return this.isPaused;
-  }
-
   private getSmallerWindowSide() {
-    return this.width <= this.height ? this.width : this.height;
+    const { height, width } = this.getScreenSize();
+    return width <= height ? width : height;
   }
 
   private calculatePlayArea() {
+    const { width, height } = this.getScreenSize();
     const windowSmallerSide = this.getSmallerWindowSide();
     const windowSideLength = Math.floor(windowSmallerSide);
     const margin = Math.floor(this.getFontSize() + windowSmallerSide * 0.1);
@@ -166,19 +101,20 @@ class Renderer {
     this.playFieldWidth = Math.round(windowSideLength - margin * 2);
     this.blockSize = this.playFieldWidth / this.blockAmount;
 
-    this.boundaries.xStart = (this.width - windowSideLength) / 2 + margin;
-    this.boundaries.yStart = (this.height - windowSideLength) / 2 + margin;
+    this.boundaries.xStart = (width - windowSideLength) / 2 + margin;
+    this.boundaries.yStart = (height - windowSideLength) / 2 + margin;
     this.boundaries.xEnd = this.boundaries.xStart + this.playFieldWidth;
     this.boundaries.yEnd = this.boundaries.yStart + this.playFieldWidth;
   }
 
   private drawPlayField() {
+    const ctx = this.getCtx();
     const lineWidth = 1;
-    this.ctx.lineWidth = lineWidth;
-    this.ctx.strokeStyle = 'white';
-    this.ctx.fillStyle = 'white';
+    ctx.lineWidth = lineWidth;
+    ctx.strokeStyle = 'white';
+    ctx.fillStyle = 'white';
 
-    this.ctx.strokeRect(
+    ctx.strokeRect(
       this.boundaries.xStart - lineWidth,
       this.boundaries.yStart - lineWidth,
       this.playFieldWidth + lineWidth + 1,
@@ -202,11 +138,12 @@ class Renderer {
   }
 
   private drawCoordinates() {
-    this.ctx.strokeStyle = '#222';
-    this.ctx.lineWidth = 1;
+    const ctx = this.getCtx();
+    ctx.strokeStyle = '#222';
+    ctx.lineWidth = 1;
 
     this.coordinates.forEach(pos => {
-      this.ctx.strokeRect(pos.x + 1, pos.y + 1, this.getSnakeSize() - 2, this.getSnakeSize() - 2);
+      ctx.strokeRect(pos.x + 1, pos.y + 1, this.getSnakeSize() - 2, this.getSnakeSize() - 2);
     })
   }
 
@@ -229,50 +166,24 @@ class Renderer {
     this.coordinates = coordinates;
   }
 
-
-  private setSize() {
-    this.height = window.innerHeight;
-    this.width = window.innerWidth;
-    this.canvas.setSize(this.width, this.height);
-  }
-
-  private calculateTime() {
-    const timeNow = new Date().getTime();
-    this.delta = timeNow - this.lastFrameTime;
-    this.lastFrameTime = timeNow;
-
-    const deltaInSeconds = this.delta / 1000;
-    this.fps = Math.round(1 / deltaInSeconds);
-
-    if (this.elapsedDelta < this.tickRate) {
-      this.elapsedDelta += this.delta;
-    } else {
-      this.elapsedDelta = 0;
-    }
-  }
-
   private getFont() {
     return `${this.getFontSize()}px arial`;
   }
 
   private setFont() {
-    this.ctx.fillStyle = 'white';
-    this.ctx.font = this.getFont();
+    const ctx = this.getCtx();
+    ctx.fillStyle = 'white';
+    ctx.font = this.getFont();
   }
 
   private displayFPS() {
-    this.fpsArr[this.intervalPos] = this.fps;
-    this.deltaArr[this.intervalPos] = this.delta;
-
-    this.avgFps = Math.round(this.fpsArr.reduce((a, b) => a + b, 0) / this.fpsArr.length);
-    this.avgDelta = Math.round(this.deltaArr.reduce((a, b) => a + b, 0) / this.deltaArr.length);
-
+    const ctx = this.getCtx();
     this.setFont();
-    this.ctx.textAlign = 'right';
+    ctx.textAlign = 'right';
     const { down } = this.getTextRowHeight();
 
-    const text = `fps: ${this.avgFps} delta: ${this.avgDelta}`;
-    this.ctx.fillText(text, this.boundaries.xEnd, down);
+    const text = `fps: ${this.getAvgFps()} delta: ${this.getAvhDelta()}`;
+    ctx.fillText(text, this.boundaries.xEnd, down);
   }
 
   private getCoordinateIndex = (position: Position) => {
@@ -284,6 +195,7 @@ class Renderer {
   }
 
   private food() {
+    const ctx = this.getCtx();
     let foodPos = this.foodPos;
 
     let firstRandomCoordinatePosition = 0;
@@ -314,19 +226,15 @@ class Renderer {
       this.foodPos = this.coordinates.findIndex((c, i) => !this.snakePos.includes(i)) || this.noFoodPos;
     }
 
-    this.ctx.fillStyle = 'red';
+    ctx.fillStyle = 'red';
     if (this.foodPos >= 0) {
       const coordinate = this.getCoordinateByIndex(this.foodPos);
-      this.ctx.fillRect(coordinate.x, coordinate.y, this.getSnakeSize(), this.getSnakeSize());
+      ctx.fillRect(coordinate.x, coordinate.y, this.getSnakeSize(), this.getSnakeSize());
     }
   }
 
   private randomIntFromInterval(min: number, max: number) { // min and max included 
     return Math.floor(Math.random() * (max - min + 1) + min)
-  }
-
-  private updateInterval() {
-    this.intervalPos = this.intervalPos < this.maxInterval ? this.intervalPos + 1 : 0;
   }
 
   private getSneakHeadCoordinateIndex() {
@@ -425,7 +333,7 @@ class Renderer {
     const snakeSize = this.getSnakeSize();
 
     const moveTo = (position: Position) => {
-      if (!this.isPaused) {
+      if (!this.getIsPaused()) {
         const warpedPos = this.teleportIfNeeded(position);
         const posIndex = this.getCoordinateIndex(warpedPos);
 
@@ -445,19 +353,20 @@ class Renderer {
       return nextPosCoordinateIndex === firstBodyCoIndex;
     }
 
-    if (this.firstRender) {
+    if (this.getIsFirstRender()) {
       this.snakePos.push(1);
     }
 
     this.snakePos.forEach((pos, i) => {
-      this.ctx.fillStyle = i === this.snakePos.length - 1 ? 'lime' : 'darkgreen';
-      this.ctx.strokeStyle = 'black';
+      const ctx = this.getCtx();
+      ctx.fillStyle = i === this.snakePos.length - 1 ? 'lime' : 'darkgreen';
+      ctx.strokeStyle = 'black';
       const coordinate = this.getCoordinateByIndex(pos);
-      this.ctx.fillRect(coordinate.x, coordinate.y, snakeSize, snakeSize);
-      this.ctx.strokeRect(coordinate.x + 1, coordinate.y + 1, snakeSize - 1, snakeSize - 1);
+      ctx.fillRect(coordinate.x, coordinate.y, snakeSize, snakeSize);
+      ctx.strokeRect(coordinate.x + 1, coordinate.y + 1, snakeSize - 1, snakeSize - 1);
     });
 
-    const latestKey = this.keysPressed.pop();
+    const latestKey = this.getPressedKeys().pop();
 
     if (latestKey === 'ArrowUp' && !isFirstBodyInDirection('u')) {
       this.snakeDir = 'u'
@@ -482,4 +391,4 @@ class Renderer {
   }
 }
 
-export default Renderer;
+export default Game;

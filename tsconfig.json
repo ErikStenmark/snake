@@ -19,7 +19,8 @@
     "isolatedModules": true,
     "noEmit": false,
     "jsx": "react-jsx",
-    "outDir": "public"
+    "outDir": "public",
+    "strictNullChecks": false
   },
   "include": [
     "src"

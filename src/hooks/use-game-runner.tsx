@@ -1,21 +1,21 @@
 import React from 'react';
-import Main from '../game/main';
+import Engine from '../game/engine/engine';
 
-const useGameRunner = (gameOn: boolean, game: Main) => {
+const useGameRunner = (gameOn: boolean, engine: Engine) => {
 
   const [isRunning, setIsRunning] = React.useState(false);
 
   React.useEffect(() => {
     if (gameOn && !isRunning) {
       setIsRunning(true);
-      game.run();
+      engine.run();
     }
 
-    if (!gameOn && isRunning && !!game) {
+    if (!gameOn && isRunning && !!engine) {
       setIsRunning(false);
-      game.end();
+      engine.end();
     }
-  }, [gameOn, isRunning, setIsRunning, game]);
+  }, [gameOn, isRunning, setIsRunning, engine]);
 
   return isRunning;
 }

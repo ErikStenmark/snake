@@ -2,18 +2,18 @@ import React, { createContext } from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './app';
 import reportWebVitals from './reportWebVitals';
-import Main from './game/main';
+import Engine from './game/engine/engine';
 import './style/index.css';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
-const main = new Main();
+const main = new Engine();
 
 export type GameContextProps = {
   data: { [key: string]: any }
-  game: Main,
+  game: Engine,
   isRunning: boolean;
   isPaused: boolean;
   setGameOn: (on: boolean) => void;

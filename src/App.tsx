@@ -1,6 +1,6 @@
 import React from 'react';
 
-import Main from './game/main';
+import Engine from './game/engine/engine';
 import MainMenu from './components/main-menu';
 import Score from './components/score';
 import PauseMenu from './components/pause-menu';
@@ -13,7 +13,7 @@ import { GameContext, GameContextProps } from '.';
 import './style/app.css';
 
 type AppProps = {
-  game: Main;
+  game: Engine;
 }
 
 const App: React.FC<AppProps> = ({ game }) => {

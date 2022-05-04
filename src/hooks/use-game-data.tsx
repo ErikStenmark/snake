@@ -1,16 +1,16 @@
 import React from 'react';
-import Main from '../game/main';
+import Engine from '../game/engine/engine';
 
-const useGameData = (game: Main) => {
+const useGameData = (engine: Engine) => {
   const [gameData, setGameData] = React.useState<any>();
 
   React.useEffect(() => {
-    game.setDataCB(setGameData);
+    engine.setDataCB(setGameData);
 
     return () => {
-      game.setDataCB(() => { });
+      engine.setDataCB(() => { });
     };
-  }, [game]);
+  }, [engine]);
 
   return gameData;
 
