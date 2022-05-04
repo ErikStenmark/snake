@@ -9,29 +9,29 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
-const main = new Engine();
+const engine = new Engine();
 
 export type GameContextProps = {
   data: { [key: string]: any }
-  game: Engine,
+  engine: Engine,
   isRunning: boolean;
   isPaused: boolean;
-  setGameOn: (on: boolean) => void;
+  setEngineOn: (on: boolean) => void;
   togglePause: () => void;
 }
 
 export const GameContext = createContext<GameContextProps>({
   data: {},
-  game: main,
+  engine: engine,
   isRunning: false,
   isPaused: false,
-  setGameOn: () => { },
+  setEngineOn: () => { },
   togglePause: () => { }
 });
 
 root.render(
   <React.StrictMode>
-    <App game={main} />
+    <App engine={engine} />
   </React.StrictMode>
 );
 

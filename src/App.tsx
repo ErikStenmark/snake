@@ -13,22 +13,22 @@ import { GameContext, GameContextProps } from '.';
 import './style/app.css';
 
 type AppProps = {
-  game: Engine;
+  engine: Engine;
 }
 
-const App: React.FC<AppProps> = ({ game }) => {
-  const [gameOn, setGameOn] = React.useState(false);
-  const data = useGameData(game);
+const App: React.FC<AppProps> = ({ engine }) => {
+  const [engineOn, setEngineOn] = React.useState(false);
+  const data = useGameData(engine);
 
-  const isRunning = useGameRunner(gameOn, game);
-  const [isPaused, togglePause] = usePause(game, isRunning);
+  const isRunning = useGameRunner(engineOn, engine);
+  const [isPaused, togglePause] = usePause(engine, isRunning);
 
   const context: GameContextProps = {
     data,
-    game,
+    engine,
     isRunning,
     isPaused,
-    setGameOn,
+    setEngineOn,
     togglePause
   }
 

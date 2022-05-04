@@ -4,7 +4,7 @@ import App from './app';
 import Engine from './game/engine/engine';
 
 test('renders learn react link', () => {
-  render(<App game={new Engine()} />);
+  render(<App engine={new Engine()} />);
   const linkElement = screen.getByText(/learn react/i);
   expect(linkElement).toBeInTheDocument();
 });

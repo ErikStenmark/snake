@@ -24,7 +24,7 @@ export const defaultGameOpts: GameOptions = {
 }
 
 const MainMenu: React.FC = () => {
-  const { isRunning, setGameOn, game } = React.useContext(GameContext);
+  const { isRunning, setEngineOn, engine } = React.useContext(GameContext);
   const [screen, setScreen] = React.useState('main');
 
   const [options, setOptions] = React.useState<GameOptions>(defaultGameOpts);
@@ -33,12 +33,12 @@ const MainMenu: React.FC = () => {
     return null;
   };
 
-  game.setOptions(options);
+  engine.setOptions(options);
 
   const setScreenAction = (screen: string) => () => setScreen(screen);
 
   const menuItems: MenuItem[] = [
-    { name: 'play', action: () => setGameOn(true) },
+    { name: 'play', action: () => setEngineOn(true) },
     { name: 'options', action: setScreenAction('options') }
   ];
 
