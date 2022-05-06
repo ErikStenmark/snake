@@ -1,9 +1,17 @@
 import Canvas from './canvas';
 import { Electron } from '../../electron/preload';
+import PubSub from './pubsub';
+
+export type ScreenSize = {
+  width: number;
+  height: number;
+}
 
 declare global { interface Window { electron: Electron; } };
 
 abstract class Renderer {
+  protected pubSub: PubSub;
+
   private canvas: Canvas;
   private ctx: CanvasRenderingContext2D;
 
@@ -32,6 +40,7 @@ abstract class Renderer {
     this.canvas = new Canvas();
     this.ctx = this.canvas.getCtx();
     this.previousFrameTime = new Date().getTime();
+    this.pubSub = new PubSub();
 
     this.setSize();
 
@@ -41,7 +50,6 @@ abstract class Renderer {
   }
 
   protected abstract onUpdate(): void;
-  protected abstract resize(width: number, height: number): void;
 
   public update() {
     this.updateTickPosition();
@@ -101,7 +109,7 @@ abstract class Renderer {
     return this.isFirstRender;
   }
 
-  protected getScreenSize() {
+  protected getScreenSize(): ScreenSize {
     return {
       width: this.screenWidth,
       height: this.screenHeight
@@ -118,7 +126,13 @@ abstract class Renderer {
 
   private onResize = () => {
     this.setSize();
-    this.resize(this.screenWidth, this.screenHeight);
+
+    this.pubSub.broadcast({
+      topic: 'SCREEN_RESIZED', data: {
+        height: this.screenHeight,
+        width: this.screenWidth
+      }
+    })
   }
 
   private onKeyDown = (e: KeyboardEvent) => {
