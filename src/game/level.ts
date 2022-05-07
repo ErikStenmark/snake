@@ -16,6 +16,7 @@ export type LevelAttributes = {
   boundaries: Boundaries;
   coordinates: Position[];
   blockSize: number;
+  squareSize: number;
 }
 
 class Level {
@@ -27,12 +28,15 @@ class Level {
   private blockSize = 0;
   private squareFactor = 4;
 
+  private isFirstRender = true;
+
   constructor(
     private pubSub: PubSub,
     private screenSize: ScreenSize,
     private ctx: CanvasRenderingContext2D
   ) {
     this.pubSub.subscribe('SCREEN_RESIZED', this.onResize);
+    this.pubSub.subscribe('FIRST_RENDER_DONE', () => this.isFirstRender = false);
     this.calculatePlayArea();
     this.calculateCoordinates();
     this.broadcastLevel();
@@ -44,6 +48,10 @@ class Level {
     ctx.lineWidth = lineWidth;
     ctx.strokeStyle = 'white';
     ctx.fillStyle = 'white';
+
+    if (this.isFirstRender) {
+      this.broadcastLevel();
+    }
 
     ctx.strokeRect(
       this.boundaries.xStart - lineWidth,
@@ -79,11 +87,11 @@ class Level {
     return this.coordinates;
   }
 
-  public getCoordinateIndex = (position: Position) => {
+  public getCoordinateIndex(position: Position) {
     return this.coordinates.findIndex(c => c.x === position.x && c.y === position.y);
   }
 
-  public getCoordinateByIndex = (index: number) => {
+  public getCoordinateByIndex(index: number) {
     return this.coordinates[index];
   }
 
@@ -100,7 +108,7 @@ class Level {
     return this.squareFactor * this.blockSize;
   }
 
-  private calculatePlayArea = () => {
+  private calculatePlayArea() {
     const { width, height } = this.screenSize;
     const windowSmallerSide = this.getSmallerWindowSide();
     const windowSideLength = Math.floor(windowSmallerSide);
@@ -134,20 +142,21 @@ class Level {
     this.coordinates = coordinates;
   }
 
-  private broadcastLevel() {
+  private broadcastLevel = () => {
     this.pubSub.broadcast({
       topic: 'LEVEL_RESIZED',
       data: {
         blockSize: this.blockSize,
         boundaries: this.boundaries,
         coordinates: this.coordinates,
-        width: this.width
+        width: this.width,
+        squareSize: this.getSquareSize()
       }
     });
   }
 
-  private onResize = (e: EventPayloadType<'SCREEN_RESIZED'>) => {
-    this.screenSize = e.data;
+  private onResize = ({ data }: EventPayloadType<'SCREEN_RESIZED'>) => {
+    this.screenSize = data;
     this.calculatePlayArea();
     this.calculateCoordinates();
 

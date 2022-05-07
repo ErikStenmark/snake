@@ -8,12 +8,15 @@ import {
   GameOptSpeed
 } from '../components/main-menu';
 import Level, { Position } from './level';
+import Food from './food';
+import { EventPayloadType } from './events';
 
 type Direction = 'l' | 'r' | 'u' | 'd';
 type SnakeDirection = Direction | undefined;
 
 class Game extends Renderer {
   private level: Level;
+  private food: Food;
 
   private tickRate = 20;
   private elapsedDelta: number = 0;
@@ -22,8 +25,7 @@ class Game extends Renderer {
   private snakePos: number[] = [];
   private snakeDir: SnakeDirection = undefined;
 
-  private noFoodPos: number = -1;
-  private foodPos: number = this.noFoodPos;
+  private foodPosition: number;
 
   public setOptions(options: any) {
     this.options = options;
@@ -32,11 +34,24 @@ class Game extends Renderer {
   constructor() {
     super();
 
+    const ctx = this.getCtx();
+
     this.level = new Level(
       this.pubSub,
       this.getScreenSize(),
-      this.getCtx()
-    )
+      ctx
+    );
+
+    this.food = new Food(
+      this.pubSub,
+      ctx
+    );
+
+    this.pubSub.subscribe('FOOD_ADDED', this.onFoodAdded);
+  }
+
+  private onFoodAdded = ({ data }: EventPayloadType<'FOOD_ADDED'>) => {
+    this.foodPosition = data;
   }
 
   public onUpdate() {
@@ -53,8 +68,7 @@ class Game extends Renderer {
     this.level.drawPlayField();
     this.level.drawCoordinates();
     this.snake();
-    this.food();
-
+    this.food.draw();
   }
 
   private tick() {
@@ -117,50 +131,6 @@ class Game extends Renderer {
     ctx.fillText(text, this.level.getBoundaries().xEnd, down);
   }
 
-  private food() {
-    const ctx = this.getCtx();
-    let foodPos = this.foodPos;
-    const coordinates = this.level.getCoordinates();
-
-    let firstRandomCoordinatePosition = 0;
-
-    const needsNewFood = foodPos === this.noFoodPos && coordinates.length;
-
-    if (needsNewFood) {
-      firstRandomCoordinatePosition = this.randomIntFromInterval(0, coordinates.length - 1);
-      foodPos = firstRandomCoordinatePosition;
-
-      while (this.snakeIncludesCoordinateIndex(foodPos)) {
-        foodPos += 1
-
-        if (foodPos > coordinates.length - 1) {
-          foodPos = 0;
-        }
-
-        if (foodPos === firstRandomCoordinatePosition) {
-          foodPos = this.noFoodPos;
-        }
-      }
-
-      this.foodPos = foodPos;
-    }
-
-
-    if (this.snakeIncludesCoordinateIndex(this.foodPos)) {
-      this.foodPos = coordinates.findIndex((c, i) => !this.snakePos.includes(i)) || this.noFoodPos;
-    }
-
-    ctx.fillStyle = 'red';
-    if (this.foodPos >= 0) {
-      const coordinate = this.level.getCoordinateByIndex(this.foodPos);
-      ctx.fillRect(coordinate.x, coordinate.y, this.level.getSquareSize(), this.level.getSquareSize());
-    }
-  }
-
-  private randomIntFromInterval(min: number, max: number) { // min and max included 
-    return Math.floor(Math.random() * (max - min + 1) + min)
-  }
-
   private getSneakHeadCoordinateIndex() {
     return this.snakePos[this.snakePos.length - 1];
   }
@@ -171,11 +141,11 @@ class Game extends Renderer {
 
   private eat() {
     const headCoordinateIndex = this.getSneakHeadCoordinateIndex();
-    const gotFood = headCoordinateIndex === this.foodPos;
+    const gotFood = headCoordinateIndex === this.foodPosition;
 
     if (gotFood) {
       this.dataCB({ score: this.snakePos.length - 1 });
-      this.foodPos = this.noFoodPos;
+      this.food.remove();
     }
 
     return gotFood;
@@ -256,9 +226,12 @@ class Game extends Renderer {
 
         if (!this.snakeIncludesCoordinateIndex(posIndex) && this.level.playFieldIncludesCoordinateIndex(posIndex)) {
           this.snakePos.push(posIndex);
+
           if (!this.eat()) {
             this.snakePos.shift();
           }
+
+          this.pubSub.broadcast({ topic: 'SNAKE_MOVED', data: this.snakePos });
         }
       }
     }

@@ -62,6 +62,7 @@ abstract class Renderer {
 
     if (this.isFirstRender) {
       this.isFirstRender = false;
+      this.pubSub.broadcast({ topic: 'FIRST_RENDER_DONE', data: null });
     }
   }
 

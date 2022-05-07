@@ -16,7 +16,6 @@ type TopicItem = {
 export default class PubSub implements IPubSub {
 
   private topics: { [key: string]: TopicItem[] } = {};
-
   public broadcast<T extends EventTopics>(payload: EventPayloadType<T>): void {
     const topicItems = this.topics[payload.topic] || [];
 
