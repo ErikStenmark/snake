@@ -7,6 +7,13 @@ export type ScreenSize = {
   height: number;
 }
 
+export type TimeAttributes = {
+  fps: number;
+  avgFps: number;
+  delta: number;
+  avgDelta: number;
+}
+
 declare global { interface Window { electron: Electron; } };
 
 abstract class Renderer {
@@ -55,6 +62,8 @@ abstract class Renderer {
     this.updateTickPosition();
     this.calculateTime();
     this.calculateAvgTime();
+
+    this.broadcastTime();
 
     this.canvas.fill();
 
@@ -124,6 +133,18 @@ abstract class Renderer {
 
   protected getPressedKeys = () => {
     return this.keysPressed;
+  }
+
+  private broadcastTime = () => {
+    this.pubSub.broadcast({
+      topic: 'NEW_FRAME',
+      data: {
+        avgDelta: this.avgDelta,
+        avgFps: this.avgFps,
+        delta: this.delta,
+        fps: this.fps
+      }
+    });
   }
 
   private onResize = () => {

@@ -11,6 +11,7 @@ import {
 import Level from './level';
 import Food from './food';
 import Snake from './snake';
+import Logger from './logger';
 
 export type Direction = 'l' | 'r' | 'u' | 'd';
 
@@ -18,6 +19,7 @@ class Game extends Renderer {
   private level: Level;
   private food: Food;
   private snake: Snake;
+  private logger: Logger;
 
   private score: number = 0;
 
@@ -36,8 +38,8 @@ class Game extends Renderer {
 
     this.level = new Level(
       this.pubSub,
-      this.getScreenSize(),
-      ctx
+      ctx,
+      this.getScreenSize()
     );
 
     this.snake = new Snake(
@@ -52,6 +54,12 @@ class Game extends Renderer {
       ctx
     );
 
+    this.logger = new Logger(
+      this.pubSub,
+      ctx,
+      this.options.fps === 'on'
+    );
+
     this.pubSub.subscribe('EAT', () => {
       this.score = this.score + 1;
       this.dataCB({ score: this.score });
@@ -60,13 +68,11 @@ class Game extends Renderer {
 
   public onUpdate() {
     if (this.getIsFirstRender()) {
-      this.getOptions();
+      this.applyOptions();
       this.dataCB({ score: this.score });
     }
 
-    if (this.options.fps === 'on') {
-      this.displayFPS();
-    }
+    this.logger.draw();
 
     this.tick();
     this.level.drawPlayField();
@@ -85,57 +91,23 @@ class Game extends Renderer {
     this.elapsedDelta += delta;
   }
 
-  private getOptions() {
+  private applyOptions() {
     const sizeMap: { [key in GameOptSize]: number } = {
       large: 1,
       medium: 2,
       small: 4
     }
-    this.level.setBlockAmount(this.level.getBlockAmount() / sizeMap[this.options.size]);
 
     const speedMap: { [key in GameOptSpeed]: number } = {
       fast: 1,
       medium: 3,
       slow: 6
     }
+
+    this.level.setBlockAmount(this.level.getBlockAmount() / sizeMap[this.options.size]);
     this.tickRate = this.tickRate * speedMap[this.options.speed];
-
     this.snake.setWalls(this.options.walls === 'on');
-  }
-
-  private getFontSize() {
-    const smallerSide = this.level.getSmallerWindowSide();
-    const windowBased = smallerSide / 25;
-    const min = 10;
-
-    return windowBased > min ? windowBased : min;
-  }
-
-  private getTextRowHeight() {
-    return {
-      up: this.getFontSize() * 2,
-      down: this.level.getBoundaries().yEnd + this.getFontSize() * 2
-    }
-  }
-
-  private getFont() {
-    return `${this.getFontSize()}px arial`;
-  }
-
-  private setFont() {
-    const ctx = this.getCtx();
-    ctx.fillStyle = 'white';
-    ctx.font = this.getFont();
-  }
-
-  private displayFPS() {
-    const ctx = this.getCtx();
-    this.setFont();
-    ctx.textAlign = 'right';
-    const { down } = this.getTextRowHeight();
-
-    const text = `fps: ${this.getAvgFps()} delta: ${this.getAvhDelta()}`;
-    ctx.fillText(text, this.level.getBoundaries().xEnd, down);
+    this.logger.setDisplaying(this.options.fps === 'on');
   }
 
 }

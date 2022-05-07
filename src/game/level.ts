@@ -33,8 +33,8 @@ class Level {
 
   constructor(
     private pubSub: PubSub,
-    private screenSize: ScreenSize,
-    private ctx: CanvasRenderingContext2D
+    private ctx: CanvasRenderingContext2D,
+    private screenSize: ScreenSize
   ) {
     this.pubSub.subscribe('SCREEN_RESIZED', this.onResize);
     this.pubSub.subscribe('FIRST_RENDER_DONE', () => this.isFirstRender = false);
@@ -82,24 +82,12 @@ class Level {
     this.calculateCoordinates();
   }
 
-  public getBoundaries() {
-    return this.boundaries;
-  }
-
-  public getCoordinates() {
-    return this.coordinates;
-  }
-
-  public getCoordinateByIndex(index: number) {
-    return this.coordinates[index];
-  }
-
-  public getSmallerWindowSide() {
+  private getSmallerWindowSide() {
     const { height, width } = this.screenSize;
     return width <= height ? width : height;
   }
 
-  public getSquareSize() {
+  private getSquareSize() {
     return this.squareFactor * this.blockSize;
   }
 
