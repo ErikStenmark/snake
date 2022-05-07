@@ -75,8 +75,8 @@ class Game extends Renderer {
     this.logger.draw();
 
     this.tick();
-    this.level.drawPlayField();
-    this.level.drawCoordinates();
+    this.level.drawLevel();
+    this.level.drawGrid();
     this.snake.draw();
     this.food.draw();
   }

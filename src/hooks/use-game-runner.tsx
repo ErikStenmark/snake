@@ -1,7 +1,7 @@
 import React from 'react';
-import Engine from '../game/engine/engine';
+import { IEngine } from '../game/engine/engine';
 
-const useGameRunner = (gameOn: boolean, engine: Engine) => {
+const useGameRunner = (gameOn: boolean, engine: IEngine) => {
 
   const [isRunning, setIsRunning] = React.useState(false);
 

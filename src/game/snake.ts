@@ -29,45 +29,49 @@ class Snake {
   }
 
   public draw() {
-    const size = this.level.squareSize;
-
-    const moveTo = (position: Position) => {
-      if (!this.isPaused) {
-        const warpedPos = this.teleportIfNeeded(position);
-        const posIndex = this.getCoordinateIndex(warpedPos);
-
-        if (!this.snakeIncludesCoordinateIndex(posIndex) && this.levelIncludesCoordinateIndex(posIndex)) {
-          this.snakePos.push(posIndex);
-
-          if (!this.eat()) {
-            this.snakePos.shift();
-          }
-
-          this.pubSub.broadcast({ topic: 'SNAKE_MOVED', data: this.snakePos });
-        }
-      }
-    }
-
-    const isFirstBodyInDirection = (direction: Direction) => {
-      const firstBodyCoIndex = this.getSnakeFirstBodyCoordinateIndex();
-      const nextPosCoordinate = this.getSnakeNextPos(direction);
-      const nextPosCoordinateIndex = this.getCoordinateIndex(nextPosCoordinate);
-      return nextPosCoordinateIndex === firstBodyCoIndex;
-    }
-
     if (this.isFirstRender) {
       this.snakePos.push(1);
     }
 
+    this.drawSnake();
+    this.setDirection();
+    this.moveOnTick();
+  }
+
+  public setWalls(setting: boolean) {
+    this.hasWalls = setting;
+  }
+
+  private drawSnake() {
+    const { ctx } = this;
+    ctx.strokeStyle = 'black';
+    const size = this.level.squareSize;
+
     this.snakePos.forEach((pos, i) => {
-      const { ctx } = this;
-      ctx.fillStyle = i === this.snakePos.length - 1 ? 'lime' : 'darkgreen';
-      ctx.strokeStyle = 'black';
       const coordinate = this.getCoordinateByIndex(pos);
+      ctx.fillStyle = i === this.snakePos.length - 1 ? 'lime' : 'darkgreen';
       ctx.fillRect(coordinate.x, coordinate.y, size, size);
       ctx.strokeRect(coordinate.x + 1, coordinate.y + 1, size - 1, size - 1);
     });
+  }
 
+  private moveOnTick() {
+    if (this.hasTicked) {
+      this.hasTicked = false;
+      const nextPos = this.getSnakeNextPos(this.snakeDir);
+      this.moveTo(nextPos);
+    }
+  }
+
+  private isFirstBodyInDirection = (direction: Direction) => {
+    const firstBodyCoIndex = this.getSnakeFirstBodyCoordinateIndex();
+    const nextPosCoordinate = this.getSnakeNextPos(direction);
+    const nextPosCoordinateIndex = this.getCoordinateIndex(nextPosCoordinate);
+    return nextPosCoordinateIndex === firstBodyCoIndex;
+  }
+
+  private setDirection() {
+    const { isFirstBodyInDirection } = this;
     const latestKey = this.getPressedKeys().pop();
 
     if (latestKey === 'ArrowUp' && !isFirstBodyInDirection('u')) {
@@ -85,16 +89,27 @@ class Snake {
     if (latestKey === 'ArrowRight' && !isFirstBodyInDirection('r')) {
       this.snakeDir = 'r'
     }
+  }
 
-    if (this.hasTicked) {
-      this.hasTicked = false;
-      const nextPos = this.getSnakeNextPos(this.snakeDir);
-      moveTo(nextPos);
+  private moveTo(position: Position) {
+    if (!this.isPaused) {
+      const warpedPos = this.teleportIfNeeded(position);
+      const posIndex = this.getCoordinateIndex(warpedPos);
+
+      if (!this.snakeIncludesCoordinateIndex(posIndex) && this.levelIncludesCoordinateIndex(posIndex)) {
+        this.snakePos.push(posIndex);
+
+        if (!this.eat()) {
+          this.snakePos.shift();
+        }
+
+        this.broadcastPosition();
+      }
     }
   }
 
-  public setWalls(setting: boolean) {
-    this.hasWalls = setting;
+  private broadcastPosition = () => {
+    this.pubSub.broadcast({ topic: 'SNAKE_MOVED', data: this.snakePos });
   }
 
   private eat = () => {

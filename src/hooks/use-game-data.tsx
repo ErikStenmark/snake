@@ -1,7 +1,7 @@
 import React from 'react';
-import Engine from '../game/engine/engine';
+import { IEngine } from '../game/engine/engine';
 
-const useGameData = (engine: Engine) => {
+const useGameData = (engine: IEngine) => {
   const [gameData, setGameData] = React.useState<any>();
 
   React.useEffect(() => {

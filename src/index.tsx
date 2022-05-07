@@ -2,7 +2,7 @@ import React, { createContext } from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './app';
 import reportWebVitals from './reportWebVitals';
-import Engine from './game/engine/engine';
+import Engine, { IEngine } from './game/engine/engine';
 import './style/index.css';
 
 const root = ReactDOM.createRoot(
@@ -13,7 +13,7 @@ const engine = new Engine();
 
 export type GameContextProps = {
   data: { [key: string]: any }
-  engine: Engine,
+  engine: IEngine,
   isRunning: boolean;
   isPaused: boolean;
   setEngineOn: (on: boolean) => void;

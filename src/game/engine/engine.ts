@@ -1,6 +1,14 @@
 import Game from '../game';
 
-export default class Engine {
+export interface IEngine {
+  run: () => void;
+  end: () => void;
+  pause: () => boolean;
+  setDataCB: (cb: (...args: any) => void) => void;
+  setOptions: (options: { [key: string]: any }) => void;
+}
+
+export default class Engine implements IEngine {
   private game: Game | null = null;
   private dataCB: () => void = () => { };
   private options: any = {};
@@ -40,7 +48,7 @@ export default class Engine {
     return this.game?.setDataCB(this.dataCB);
   }
 
-  public setOptions(options: any) {
+  public setOptions(options: { [key: string]: any }) {
     this.options = options;
     this.game?.setOptions(options);
   }

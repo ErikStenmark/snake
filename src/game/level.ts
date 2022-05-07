@@ -29,6 +29,9 @@ class Level {
   private blockSize = 0;
   private squareFactor = 4;
 
+  private gridColor = '#222';
+  private levelColor = 'white';
+
   private isFirstRender = true;
 
   constructor(
@@ -38,17 +41,17 @@ class Level {
   ) {
     this.pubSub.subscribe('SCREEN_RESIZED', this.onResize);
     this.pubSub.subscribe('FIRST_RENDER_DONE', () => this.isFirstRender = false);
-    this.calculatePlayArea();
+    this.calculateArea();
     this.calculateCoordinates();
     this.broadcastLevel();
   }
 
-  public drawPlayField() {
+  public drawLevel() {
     const { ctx } = this
     const lineWidth = 1;
     ctx.lineWidth = lineWidth;
-    ctx.strokeStyle = 'white';
-    ctx.fillStyle = 'white';
+    ctx.strokeStyle = this.levelColor;
+    ctx.fillStyle = this.levelColor;
 
     if (this.isFirstRender) {
       this.broadcastLevel();
@@ -62,13 +65,18 @@ class Level {
     );
   }
 
-  public drawCoordinates() {
+  public drawGrid() {
     const { ctx } = this;
-    ctx.strokeStyle = '#222';
+    ctx.strokeStyle = this.gridColor;
     ctx.lineWidth = 1;
 
     this.coordinates.forEach(pos => {
-      ctx.strokeRect(pos.x + 1, pos.y + 1, this.getSquareSize() - 2, this.getSquareSize() - 2);
+      ctx.strokeRect(
+        pos.x + 1,
+        pos.y + 1,
+        this.getSquareSize() - 2,
+        this.getSquareSize() - 2
+      );
     })
   }
 
@@ -78,7 +86,7 @@ class Level {
 
   public setBlockAmount(amount: number) {
     this.blockAmount = amount;
-    this.calculatePlayArea();
+    this.calculateArea();
     this.calculateCoordinates();
   }
 
@@ -91,7 +99,7 @@ class Level {
     return this.squareFactor * this.blockSize;
   }
 
-  private calculatePlayArea() {
+  private calculateArea() {
     const { width, height } = this.screenSize;
     const windowSmallerSide = this.getSmallerWindowSide();
     const windowSideLength = Math.floor(windowSmallerSide);
@@ -108,7 +116,6 @@ class Level {
 
   private calculateCoordinates() {
     const coordinates: Position[] = [];
-
     let y = this.boundaries.yStart;
 
     while (y < this.boundaries.yEnd) {
@@ -141,9 +148,8 @@ class Level {
 
   private onResize = ({ data }: EventPayloadType<'SCREEN_RESIZED'>) => {
     this.screenSize = data;
-    this.calculatePlayArea();
+    this.calculateArea();
     this.calculateCoordinates();
-
     this.broadcastLevel();
   }
 
