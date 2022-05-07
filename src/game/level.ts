@@ -15,6 +15,7 @@ export type LevelAttributes = {
   width: number;
   boundaries: Boundaries;
   coordinates: Position[];
+  blockAmount: number;
   blockSize: number;
   squareSize: number;
 }
@@ -77,6 +78,8 @@ class Level {
 
   public setBlockAmount(amount: number) {
     this.blockAmount = amount;
+    this.calculatePlayArea();
+    this.calculateCoordinates();
   }
 
   public getBoundaries() {
@@ -87,16 +90,8 @@ class Level {
     return this.coordinates;
   }
 
-  public getCoordinateIndex(position: Position) {
-    return this.coordinates.findIndex(c => c.x === position.x && c.y === position.y);
-  }
-
   public getCoordinateByIndex(index: number) {
     return this.coordinates[index];
-  }
-
-  public playFieldIncludesCoordinateIndex(index: number) {
-    return !!this.coordinates[index];
   }
 
   public getSmallerWindowSide() {
@@ -146,6 +141,7 @@ class Level {
     this.pubSub.broadcast({
       topic: 'LEVEL_RESIZED',
       data: {
+        blockAmount: this.blockAmount,
         blockSize: this.blockSize,
         boundaries: this.boundaries,
         coordinates: this.coordinates,

@@ -16,48 +16,24 @@ class Food {
   ) {
     this.pubSub.subscribe('LEVEL_RESIZED', this.onLevelRender);
     this.pubSub.subscribe('SNAKE_MOVED', this.onSnakeMoved);
+    this.pubSub.subscribe('EAT', () => this.position = this.resetPosition);
   }
 
   public draw() {
-    let { position } = this;
     const { ctx } = this;
-
     const coordinates = this.level?.coordinates;
 
     if (!coordinates) {
       return;
     }
 
-    let firstRandomCoordinatePosition = 0;
-
     if (this.needsNewFood()) {
-      firstRandomCoordinatePosition = this.randomIntFromRange(0, coordinates.length - 1);
-      position = firstRandomCoordinatePosition;
-
-      while (this.snakeIncludesPosition(position)) {
-        position += 1
-
-        if (position > coordinates.length - 1) {
-          position = 0;
-        }
-
-        if (position === firstRandomCoordinatePosition) {
-          position = this.resetPosition;
-        }
-      }
-
-      this.position = position;
-      this.broadcastPosition();
-    }
-
-
-    if (this.snakeIncludesPosition(this.position)) {
-      this.position = coordinates.findIndex((c, i) => !this.snakePositions.includes(i)) || this.resetPosition;
+      this.getNewPosition();
     }
 
     ctx.fillStyle = 'red';
     if (this.position >= 0) {
-      const coordinate = this.level.coordinates[position];
+      const coordinate = this.level.coordinates[this.position];
       ctx.fillRect(
         coordinate.x,
         coordinate.y,
@@ -67,8 +43,27 @@ class Food {
     }
   }
 
-  public remove() {
-    this.position = this.resetPosition;
+  private getNewPosition() {
+    let firstRandomCoordinatePosition;
+    let position;
+
+    firstRandomCoordinatePosition = this.randomIntFromRange(0, this.level.coordinates.length - 1);
+    position = firstRandomCoordinatePosition;
+
+    while (this.snakeIncludesPosition(position)) {
+      position += 1
+
+      if (position > this.level.coordinates.length - 1) {
+        position = 0;
+      }
+
+      if (position === firstRandomCoordinatePosition) {
+        position = this.resetPosition;
+      }
+    }
+
+    this.position = position;
+    this.broadcastPosition();
   }
 
   private onLevelRender = ({ data }: EventPayloadType<'LEVEL_RESIZED'>) => {

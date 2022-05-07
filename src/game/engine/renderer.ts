@@ -66,8 +66,9 @@ abstract class Renderer {
     }
   }
 
-  public togglePause(): boolean {
+  public togglePause = (): boolean => {
     this.isPaused = !this.isPaused;
+    this.pubSub.broadcast({ topic: 'PAUSE', data: this.isPaused });
     return this.isPaused;
   }
 
@@ -121,7 +122,7 @@ abstract class Renderer {
     return this.isPaused;
   }
 
-  protected getPressedKeys() {
+  protected getPressedKeys = () => {
     return this.keysPressed;
   }
 
