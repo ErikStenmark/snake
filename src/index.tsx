@@ -1,8 +1,9 @@
-import React, { createContext } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './app';
 import reportWebVitals from './reportWebVitals';
-import Engine, { IEngine } from './game/engine/engine';
+import App from './app';
+import Engine from './game/engine/engine';
+import MenuProvider from './menu-context/menu-provider';
 import './style/index.css';
 
 const root = ReactDOM.createRoot(
@@ -11,27 +12,11 @@ const root = ReactDOM.createRoot(
 
 const engine = new Engine();
 
-export type GameContextProps = {
-  data: { [key: string]: any }
-  engine: IEngine,
-  isRunning: boolean;
-  isPaused: boolean;
-  setEngineOn: (on: boolean) => void;
-  togglePause: () => void;
-}
-
-export const GameContext = createContext<GameContextProps>({
-  data: {},
-  engine: engine,
-  isRunning: false,
-  isPaused: false,
-  setEngineOn: () => { },
-  togglePause: () => { }
-});
-
 root.render(
   <React.StrictMode>
-    <App engine={engine} />
+    <MenuProvider engine={engine}>
+      <App />
+    </MenuProvider>
   </React.StrictMode>
 );
 

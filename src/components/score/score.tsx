@@ -1,9 +1,9 @@
-import React, { useContext } from 'react';
-import { GameContext } from '../..';
+import React from 'react';
+import { useMenu } from '../../menu-context/menu-context';
 import styles from './score.module.css';
 
 const Score: React.FC = () => {
-  const { data, isRunning } = useContext(GameContext);
+  const { data, isRunning } = useMenu();
 
   if (!data || !isRunning) {
     return null;

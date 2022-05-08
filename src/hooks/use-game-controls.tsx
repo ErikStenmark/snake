@@ -1,8 +1,13 @@
 import React from 'react';
-import { GameContextProps } from '..';
+import { useMenu } from '../menu-context/menu-context';
 
-const useGameControls = (props: GameContextProps) => {
-  const { setEngineOn, togglePause, isRunning, isPaused } = props;
+const useGameControls = () => {
+  const {
+    setEngineOn,
+    togglePause,
+    isRunning,
+    isPaused
+  } = useMenu();
 
   React.useEffect(() => {
     const keyListener = (e: KeyboardEvent) => {

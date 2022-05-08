@@ -1,5 +1,5 @@
 import React from 'react';
-import { GameContext } from '../..';
+import { useMenu } from '../../menu-context/menu-context';
 import Heading, { HeadingSize } from '../heading';
 import Menu, { MenuItem } from '../menu';
 
@@ -23,8 +23,10 @@ export const defaultGameOpts: GameOptions = {
   fps: 'off'
 }
 
+export const gameTitle = 'snake'
+
 const MainMenu: React.FC = () => {
-  const { isRunning, setEngineOn, engine } = React.useContext(GameContext);
+  const { isRunning, setEngineOn, engine } = useMenu();
   const [screen, setScreen] = React.useState('main');
 
   const [options, setOptions] = React.useState<GameOptions>(defaultGameOpts);
@@ -92,10 +94,9 @@ const MainMenu: React.FC = () => {
     fps: { items: fpsOptions, onExit: setScreenAction('options') }
   }
 
-  const title = 'snake'
   const isMain = screen === 'main';
   const size = isMain ? HeadingSize.LARGE : HeadingSize.SMALL;
-  const headingText = isMain ? title : screen;
+  const headingText = isMain ? gameTitle : screen;
   const currentScreen = screens[screen];
 
   return (

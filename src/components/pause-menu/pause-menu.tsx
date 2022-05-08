@@ -1,9 +1,9 @@
-import React, { useContext } from 'react';
-import { GameContext } from '../..';
+import React from 'react';
+import { useMenu } from '../../menu-context/menu-context';
 import style from './pause-menu.module.css';
 
 const PauseMenu: React.FC = () => {
-  const { isPaused } = useContext(GameContext);
+  const { isPaused } = useMenu();
 
   if (!isPaused) {
     return null;

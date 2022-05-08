@@ -1,6 +1,8 @@
 import App from './app';
 import { IEngine } from './game/engine/engine';
 import { render, screen } from '@testing-library/react';
+import MenuProvider from './menu-context/menu-provider';
+import { gameTitle } from './components/main-menu';
 
 class MockEngine implements IEngine {
   public run = () => {/** noop */ }
@@ -10,8 +12,12 @@ class MockEngine implements IEngine {
   public setOptions = (options: { [key: string]: any; }) => {/** noop */ }
 }
 
-test('renders learn react link', () => {
-  render(<App engine={new MockEngine()} />);
-  const mainMenu = screen.getByText('snake');
+test('renders the menu', () => {
+  render(
+    <MenuProvider engine={new MockEngine()}>
+      <App />
+    </MenuProvider>
+  );
+  const mainMenu = screen.getByText(gameTitle);
   expect(mainMenu).toBeInTheDocument();
 });
