@@ -1,5 +1,5 @@
 import React from 'react';
-import { IEngine } from '../game/engine/engine';
+import { IEngine } from '../game/engine';
 
 const useGameRunner = (gameOn: boolean, engine: IEngine) => {
 

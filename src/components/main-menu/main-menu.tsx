@@ -1,5 +1,5 @@
 import React from 'react';
-import { useMenu } from '../../menu-context/menu-context';
+import { useMenu } from '../../menu-context';
 import Heading, { HeadingSize } from '../heading';
 import Menu, { MenuItem } from '../menu';
 

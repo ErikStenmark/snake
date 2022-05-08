@@ -1,6 +1,6 @@
 import React from 'react';
-import style from './menu.module.css';
 import classNames from 'classnames';
+import style from './menu.module.css';
 
 export type MenuItem = {
   name: string;

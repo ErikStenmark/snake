@@ -1,5 +1,5 @@
 import React from 'react';
-import { useMenu } from '../menu-context/menu-context';
+import { useMenu } from '../menu-context';
 
 const useGameControls = () => {
   const {

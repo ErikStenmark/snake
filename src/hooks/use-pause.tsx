@@ -1,5 +1,5 @@
 import React from 'react';
-import { IEngine } from '../game/engine/engine';
+import { IEngine } from '../game/engine';
 
 const usePause = (engine: IEngine, isRunning: boolean): [boolean, () => void] => {
   const [isPaused, setIsPaused] = React.useState(false);

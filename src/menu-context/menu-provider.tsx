@@ -1,5 +1,5 @@
 import React from 'react';
-import { IEngine } from '../game/engine/engine';
+import { IEngine } from '../game/engine';
 import useGameData from '../hooks/use-game-data';
 import useGameRunner from '../hooks/use-game-runner';
 import usePause from '../hooks/use-pause';

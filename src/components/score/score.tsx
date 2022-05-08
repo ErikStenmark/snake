@@ -1,5 +1,5 @@
 import React from 'react';
-import { useMenu } from '../../menu-context/menu-context';
+import { useMenu } from '../../menu-context';
 import styles from './score.module.css';
 
 const Score: React.FC = () => {

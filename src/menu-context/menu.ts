@@ -1,4 +1,4 @@
-import { IEngine } from '../game/engine/engine';
+import { IEngine } from '../game/engine';
 
 type GameData = { [key: string]: any };
 
