@@ -28,7 +28,6 @@ export const gameTitle = 'snake'
 const MainMenu: React.FC = () => {
   const { isRunning, setEngineOn, engine } = useMenu();
   const [screen, setScreen] = React.useState('main');
-
   const [options, setOptions] = React.useState<GameOptions>(defaultGameOpts);
 
   if (isRunning) {

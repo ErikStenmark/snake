@@ -1,7 +1,7 @@
 import React from 'react';
 import { IEngine } from '../game/engine';
 
-const usePause = (engine: IEngine, isRunning: boolean): [boolean, () => void] => {
+const useGamePause = (engine: IEngine, isRunning: boolean): [boolean, () => void] => {
   const [isPaused, setIsPaused] = React.useState(false);
 
   const togglePause = () => {
@@ -15,4 +15,4 @@ const usePause = (engine: IEngine, isRunning: boolean): [boolean, () => void] =>
   return [isPaused, togglePause];
 }
 
-export default usePause;
+export default useGamePause;

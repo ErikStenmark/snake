@@ -2,7 +2,7 @@ import { IEngine } from '../game/engine';
 
 type GameData = { [key: string]: any };
 
-export type MenuProps = {
+export type MenuContextProps = {
   engine: IEngine;
   data: GameData;
   isRunning: boolean;
@@ -14,7 +14,7 @@ export type MenuProps = {
 export default class Menu {
 
   constructor(
-    private props: MenuProps
+    private props: MenuContextProps
   ) { }
 
   public getProps() {

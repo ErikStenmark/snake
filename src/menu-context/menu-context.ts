@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react';
-import Menu, { MenuProps } from './menu';
+import Menu, { MenuContextProps } from './menu';
 
-export const defaultProps: MenuProps = {
+export const defaultMenuContextProps: MenuContextProps = {
   data: null,
   engine: null,
   isPaused: false,
@@ -14,14 +14,17 @@ export type MenuContext = {
   getMenu(): Menu;
 }
 
-export const createMenu = (props: MenuProps): Menu => new Menu(props);
+export const createMenu = (props: MenuContextProps): Menu => new Menu(props);
 
-export const menuContextFactory = (props: MenuProps) => ({
+export const menuContextFactory = (props: MenuContextProps) => ({
   getMenu: () => createMenu(props)
 });
 
-const gameContext = createContext<MenuContext>(menuContextFactory(defaultProps));
+const gameContext = createContext<MenuContext>(menuContextFactory(defaultMenuContextProps));
 
-export const useMenu = (): MenuProps => useContext(gameContext).getMenu().getProps();
+export const useMenu = (): MenuContextProps => {
+  return useContext(gameContext).getMenu().getProps()
+}
+
 
 export default gameContext;
