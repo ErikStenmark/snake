@@ -6,7 +6,10 @@ export enum HeadingSize {
   LARGE = 'LARGE'
 }
 
-type HeadingProps = React.HTMLAttributes<HTMLElement> & {
+export const headingColor = 'lime'
+export const headingFont = 'PressStart2P'
+
+export type HeadingProps = React.HTMLAttributes<HTMLElement> & {
   size?: HeadingSize;
   component?: React.ElementType;
 }
@@ -21,8 +24,8 @@ const Heading: React.FC<HeadingProps> = ({ size, component, color, style, ...res
   const Component = component || (!!size ? sizeMap[size] : 'h1');
 
   const styleProp: React.HTMLAttributes<HTMLElement>['style'] = {
-    fontFamily: 'PressStart2P',
-    color: color || 'lime',
+    fontFamily: headingFont,
+    color: color || headingColor,
     ...style,
   }
 
