@@ -1,15 +1,14 @@
 import React from 'react';
-import { useMenu } from '../menu-context';
+import { MenuContextProps } from '../menu-context';
 
-const useGameControls = () => {
-  const {
-    setEngineOn,
-    togglePause,
-    isRunning,
-    isPaused
-  } = useMenu();
-
+const useGameControls = (props: MenuContextProps) => {
   React.useEffect(() => {
+    if (!props) {
+      return;
+    }
+
+    const { isPaused, isRunning, setEngineOn, togglePause } = props;
+
     const keyListener = (e: KeyboardEvent) => {
       e.preventDefault();
 
@@ -27,7 +26,7 @@ const useGameControls = () => {
       window.removeEventListener('keydown', keyListener)
     };
 
-  }, [isRunning, isPaused, setEngineOn, togglePause]);
+  }, [props]);
 }
 
 export default useGameControls;

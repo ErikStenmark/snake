@@ -12,9 +12,7 @@ export const useGame = (engine: IEngine): MenuContextProps => {
   const isRunning = useGameRunner(engineOn, engine);
   const [isPaused, togglePause] = useGamePause(engine, isRunning);
 
-  useGameControls();
-
-  return {
+  const props: MenuContextProps = {
     data,
     engine,
     isPaused,
@@ -22,4 +20,9 @@ export const useGame = (engine: IEngine): MenuContextProps => {
     setEngineOn,
     togglePause
   }
+
+  useGameControls(props);
+
+  return props;
+
 }
