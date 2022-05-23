@@ -2,7 +2,7 @@ import { screen } from '@testing-library/react';
 import { menuProviderWrapper } from '../../__test_utils__/menu-provider-wrapper';
 import { MockEngine } from '../../__test_utils__/mock-engine';
 import { renderFactory } from '../../__test_utils__/renderFactory';
-import MainMenu, { gameTitle } from './main-menu';
+import MainMenu, { mainMenuTitle, mainOptionsTitle } from './main-menu';
 import userEvent from '@testing-library/user-event';
 
 const runSpy = jest.fn();
@@ -30,7 +30,7 @@ describe('main-menu', () => {
 
     it('should render without crashing', () => {
         render();
-        expect(screen.getByText(gameTitle)).toBeInTheDocument();
+        expect(screen.getByText(mainMenuTitle)).toBeInTheDocument();
     });
 
     it('should run game with enter', () => {
@@ -42,7 +42,7 @@ describe('main-menu', () => {
     it('should open options menu', () => {
         const { container } = render();
         goToOptions(container);
-        expect(screen.getByText('options')).toBeInTheDocument();
+        expect(screen.getByText(mainOptionsTitle)).toBeInTheDocument();
     });
 
 });
