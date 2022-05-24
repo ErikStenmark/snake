@@ -1,6 +1,6 @@
 import React from 'react';
 import { useMenu } from '../../menu-context';
-import MultiLevelMenu, { ActionItem, SubMenuItem } from '../multi-level-menu/multi-level-menu';
+import MultiLevelMenu, { ActionItem, SubMenuItem } from '../multi-level-menu';
 
 type GameOptSwitch = 'on' | 'off';
 export type GameOptSpeed = 'slow' | 'medium' | 'fast';
