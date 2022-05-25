@@ -104,6 +104,8 @@ class Snake {
         }
 
         this.broadcastPosition();
+      } else {
+        this.broadcastGameOver();
       }
     }
   }
@@ -112,12 +114,20 @@ class Snake {
     this.pubSub.broadcast({ topic: 'SNAKE_MOVED', data: this.snakePos });
   }
 
-  private eat = () => {
+  private broadcastEat = () => {
+    this.pubSub.broadcast({ topic: 'EAT', data: null });
+  }
+
+  private broadcastGameOver = () => {
+    this.pubSub.broadcast({ topic: 'GAME_OVER', data: null });
+  }
+
+  private eat() {
     const headCoordinateIndex = this.getSneakHeadCoordinateIndex();
     const gotFood = headCoordinateIndex === this.foodPosition;
 
     if (gotFood) {
-      this.pubSub.broadcast({ topic: 'EAT', data: null });
+      this.broadcastEat();
     }
 
     return gotFood;

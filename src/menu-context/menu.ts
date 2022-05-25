@@ -7,7 +7,9 @@ export type MenuContextProps = {
   data: GameData;
   isRunning: boolean;
   isPaused: boolean;
+  endScore: number;
   setEngineOn: (on: boolean) => void;
+  setEndScore: (score: number) => void;
   togglePause: () => void;
 }
 

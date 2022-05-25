@@ -15,6 +15,7 @@ type EventPayloadMap = {
   SNAKE_MOVED: number[];
   FOOD_ADDED: number;
   EAT: null;
+  GAME_OVER: null;
 }
 
 export const EVENTS: EventsMap = {
@@ -31,6 +32,7 @@ export const EVENTS: EventsMap = {
   SNAKE_MOVED: 'SNAKE_MOVED',
   FOOD_ADDED: 'FOOD_ADDED',
   EAT: 'EAT',
+  GAME_OVER: 'GAME_OVER',
 }
 
 export type EventTopics = keyof EventPayloadMap;

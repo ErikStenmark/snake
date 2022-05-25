@@ -104,7 +104,7 @@ abstract class Renderer {
     return this.delta;
   }
 
-  protected getAvhDelta() {
+  protected getAvgDelta() {
     return this.avgDelta;
   }
 

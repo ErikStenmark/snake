@@ -11,6 +11,12 @@ export const useGame = (engine: IEngine): MenuContextProps => {
   const data = useGameData(engine);
   const isRunning = useGameRunner(engineOn, engine);
   const [isPaused, togglePause] = useGamePause(engine, isRunning);
+  const [endScore, setEndScore] = React.useState<number>(undefined);
+
+  engine.setOnGameOver((score) => {
+    setEndScore(score);
+    setEngineOn(false);
+  });
 
   useGameControls();
 
@@ -19,6 +25,8 @@ export const useGame = (engine: IEngine): MenuContextProps => {
     engine,
     isPaused,
     isRunning,
+    endScore,
+    setEndScore,
     setEngineOn,
     togglePause
   }

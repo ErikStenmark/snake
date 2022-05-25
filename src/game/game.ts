@@ -26,9 +26,14 @@ class Game extends Renderer {
   private tickRate = 20;
   private elapsedDelta: number = 0;
   private options: GameOptions = defaultGameOpts;
+  private onGameOverCB: (...args: any) => void;
 
   public setOptions(options: any) {
     this.options = options;
+  }
+
+  public setOnGameOver(cb: () => void) {
+    this.onGameOverCB = cb;
   }
 
   constructor() {
@@ -64,6 +69,10 @@ class Game extends Renderer {
       this.score = this.score + 1;
       this.dataCB({ score: this.score });
     });
+
+    this.pubSub.subscribe('GAME_OVER', () => {
+      this.onGameOver();
+    })
   }
 
   public onUpdate() {
@@ -108,6 +117,11 @@ class Game extends Renderer {
     this.tickRate = this.tickRate * speedMap[this.options.speed];
     this.snake.setWalls(this.options.walls === 'on');
     this.logger.setDisplaying(this.options.fps === 'on');
+  }
+
+  private onGameOver = () => {
+    this.endGame();
+    this.onGameOverCB(this.score);
   }
 
 }

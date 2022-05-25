@@ -4,21 +4,24 @@ export interface IEngine {
   run: () => void;
   end: () => void;
   pause: () => boolean;
+  setOnGameOver: (cb: (...args: any) => void) => void;
   setDataCB: (cb: (...args: any) => void) => void;
   setOptions: (options: { [key: string]: any }) => void;
 }
 
 export default class Engine implements IEngine {
   private game: Game | null = null;
-  private dataCB: () => void = () => { };
   private options: any = {};
   private isRunning = false;
+  private dataCB: () => void = () => { };
+  private gameOverCB: () => void = () => { };
 
   public run() {
     this.game = new Game();
+    this.isRunning = true;
     this.game.setDataCB(this.dataCB);
     this.game.setOptions(this.options);
-    this.isRunning = true;
+    this.game.setOnGameOver(this.gameOverCB);
 
     const loop = () => window.requestAnimationFrame(gameLoop);
 
@@ -51,6 +54,11 @@ export default class Engine implements IEngine {
   public setOptions(options: { [key: string]: any }) {
     this.options = options;
     this.game?.setOptions(options);
+  }
+
+  public setOnGameOver(cb: () => void) {
+    this.gameOverCB = cb;
+    this.game?.setOnGameOver(this.gameOverCB);
   }
 
 }
