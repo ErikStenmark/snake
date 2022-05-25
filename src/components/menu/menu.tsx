@@ -48,18 +48,17 @@ const Menu: React.FC<MenuProps> = ({ items, onExit, children, className, ...rest
 
   React.useEffect(() => {
     const selected = items.find(item => item.selected);
-    setActiveItem(!!selected ? selected : items[0]);
+    setActiveItem(selected ? selected : items[0]);
   }, [items, setActiveItem]);
 
   return (
     <div {...rest} className={classNames(style.root, className)}>
       {children}
       {items.map(item => {
-
         const classProp = classNames({
           [style.active]: activeItem.name === item.name,
           [style.selected]: item.selected
-        })
+        });
 
         return (
           <button key={`menu-item-${item.name}`} className={classProp}>

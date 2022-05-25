@@ -8,7 +8,7 @@ const useGameData = (engine: IEngine) => {
     engine.setDataCB(setGameData);
 
     return () => {
-      engine.setDataCB(() => { });
+      engine.setDataCB(() => {/* noop */ });
     };
   }, [engine]);
 

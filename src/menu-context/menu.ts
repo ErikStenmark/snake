@@ -2,6 +2,9 @@ import { IEngine } from '../game/engine';
 
 type GameData = { [key: string]: any };
 
+export type EngineOnFn = (on: boolean) => void;
+export type TogglePauseFn = () => void;
+
 export type MenuContextProps = {
   engine: IEngine;
   data: GameData;

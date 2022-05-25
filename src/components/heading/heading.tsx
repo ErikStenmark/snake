@@ -15,13 +15,13 @@ export type HeadingProps = React.HTMLAttributes<HTMLElement> & {
 }
 
 const sizeMap: { [key in HeadingSize]: React.ElementType } = {
-  [HeadingSize.SMALL]: 'h3',
-  [HeadingSize.MEDIUM]: 'h2',
   [HeadingSize.LARGE]: 'h1',
+  [HeadingSize.MEDIUM]: 'h2',
+  [HeadingSize.SMALL]: 'h3'
 }
 
 const Heading: React.FC<HeadingProps> = ({ size, component, color, style, ...rest }) => {
-  const Component = component || (!!size ? sizeMap[size] : 'h1');
+  const Component = component || (size ? sizeMap[size] : 'h1');
 
   const styleProp: React.HTMLAttributes<HTMLElement>['style'] = {
     fontFamily: headingFont,

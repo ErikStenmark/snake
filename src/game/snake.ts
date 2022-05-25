@@ -9,8 +9,8 @@ class Snake {
   private snakeDir: SnakeDirection = undefined;
 
   private level: LevelAttributes;
-  private isPaused: boolean = false;
-  private isFirstRender: boolean = true;
+  private isPaused = false;
+  private isFirstRender = true;
   private foodPosition: number;
 
   private hasTicked = false;

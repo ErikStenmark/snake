@@ -4,7 +4,7 @@ import { LevelAttributes } from './level';
 
 class Food {
 
-  private resetPosition: number = -1;
+  private resetPosition = -1;
   private position: number = this.resetPosition;
 
   private level: LevelAttributes;
@@ -44,10 +44,9 @@ class Food {
   }
 
   private getNewPosition() {
-    let firstRandomCoordinatePosition;
     let position;
 
-    firstRandomCoordinatePosition = this.randomIntFromRange(0, this.level.coordinates.length - 1);
+    const firstRandomCoordinatePosition = this.randomIntFromRange(0, this.level.coordinates.length - 1);
     position = firstRandomCoordinatePosition;
 
     while (this.snakeIncludesPosition(position)) {
@@ -91,7 +90,7 @@ class Food {
       topic: 'FOOD_ADDED',
       data: this.position
     });
-  };
+  }
 
 }
 
