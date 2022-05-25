@@ -21,7 +21,7 @@ const sizeMap: { [key in HeadingSize]: React.ElementType } = {
 }
 
 const Heading: React.FC<HeadingProps> = ({ size, component, color, style, ...rest }) => {
-  const Component = component || (!!size ? sizeMap[size] : 'h1');
+  const Component = component || (size ? sizeMap[size] : 'h1');
 
   const styleProp: React.HTMLAttributes<HTMLElement>['style'] = {
     fontFamily: headingFont,

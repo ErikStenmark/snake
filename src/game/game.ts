@@ -21,10 +21,10 @@ class Game extends Renderer {
   private snake: Snake;
   private logger: Logger;
 
-  private score: number = 0;
+  private score = 0;
 
   private tickRate = 20;
-  private elapsedDelta: number = 0;
+  private elapsedDelta = 0;
   private options: GameOptions = defaultGameOpts;
 
   public setOptions(options: any) {
@@ -86,7 +86,7 @@ class Game extends Renderer {
     if (this.elapsedDelta >= this.tickRate) {
       this.elapsedDelta = 0;
       this.pubSub.broadcast({ topic: 'TICK', data: null });
-    };
+    }
 
     this.elapsedDelta += delta;
   }

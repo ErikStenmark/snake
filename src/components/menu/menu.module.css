@@ -19,7 +19,7 @@
 }
 
 .root button.active {
-  color: rgb(255, 0, 191) !important;
+  color: rgb(255, 0, 191);
 }
 
 .root button.selected::before {

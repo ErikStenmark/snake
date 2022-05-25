@@ -6,7 +6,7 @@ export const defaultMenuContextProps: MenuContextProps = {
   engine: null,
   isPaused: false,
   isRunning: false,
-  setEngineOn: (state: boolean) => {/** noop */ },
+  setEngineOn: () => {/** noop */ },
   togglePause: () => {/** noop */ }
 }
 
