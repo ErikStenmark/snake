@@ -14,7 +14,7 @@ export type TimeAttributes = {
   avgDelta: number;
 }
 
-declare global { interface Window { electron: Electron; } };
+declare global { interface Window { electron: Electron; } }
 
 abstract class Renderer {
   protected pubSub: PubSub;
@@ -22,24 +22,24 @@ abstract class Renderer {
   private canvas: Canvas;
   private ctx: CanvasRenderingContext2D;
 
-  private screenWidth: number = 0;
-  private screenHeight: number = 0;
+  private screenWidth = 0;
+  private screenHeight = 0;
 
-  private maxTick: number = 10;
-  private tickPosition: number = 0;
+  private maxTick = 10;
+  private tickPosition = 0;
   private previousFrameTime: number;
 
-  private fps: number = 0;
-  private avgFps: number = 0;
+  private fps = 0;
+  private avgFps = 0;
   private fpsArray: number[] = [];
 
-  private delta: number = 0;
-  private avgDelta: number = 0;
+  private delta = 0;
+  private avgDelta = 0;
   private deltaArray: number[] = [];
 
   private keysPressed: string[] = [];
-  private isPaused: boolean = false;
-  private isFirstRender: boolean = true;
+  private isPaused = false;
+  private isFirstRender = true;
 
   protected dataCB: (...args: any) => void = null;
 

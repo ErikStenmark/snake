@@ -4,13 +4,13 @@ export type TopicSubscriptionHandler<T extends EventTopics> = (payload: EventPay
 
 export interface IPubSub {
   broadcast<T extends EventTopics>(payload: EventPayloadType<T>): void;
-  subscribe<T extends EventTopics>(topic: T, handler: TopicSubscriptionHandler<T>): Symbol;
-  unsubscribe(subscriptionSymbol: Symbol): void;
+  subscribe<T extends EventTopics>(topic: T, handler: TopicSubscriptionHandler<T>): symbol;
+  unsubscribe(subscriptionSymbol: symbol): void;
 }
 
 type TopicItem = {
   handler: TopicSubscriptionHandler<any>;
-  subscriptionSymbol: Symbol;
+  subscriptionSymbol: symbol;
 }
 
 export default class PubSub implements IPubSub {
@@ -24,7 +24,7 @@ export default class PubSub implements IPubSub {
     });
   }
 
-  public subscribe<T extends EventTopics>(topic: T, handler: TopicSubscriptionHandler<T>): Symbol {
+  public subscribe<T extends EventTopics>(topic: T, handler: TopicSubscriptionHandler<T>): symbol {
     const topicUpper = topic.toLocaleUpperCase();
     const subscriptionSymbol = Symbol();
 
@@ -40,7 +40,7 @@ export default class PubSub implements IPubSub {
     return subscriptionSymbol;
   }
 
-  public unsubscribe(subscriptionSymbol: Symbol): void {
+  public unsubscribe(subscriptionSymbol: symbol): void {
     for (const topicKey of Object.keys(this.topics)) {
       const topicItems = this.topics[topicKey];
 

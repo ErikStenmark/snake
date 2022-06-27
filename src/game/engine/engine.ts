@@ -13,8 +13,8 @@ export default class Engine implements IEngine {
   private game: Game | null = null;
   private options: any = {};
   private isRunning = false;
-  private dataCB: () => void = () => { };
-  private gameOverCB: () => void = () => { };
+  private dataCB: () => void = () => { /** noop */ };
+  private gameOverCB: () => void = () => { /** noop */ };
 
   public run() {
     this.game = new Game();
