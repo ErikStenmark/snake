@@ -132,7 +132,7 @@ abstract class Renderer {
   }
 
   protected getPressedKeys = () => {
-    return this.keysPressed;
+    return [...this.keysPressed];
   }
 
   private broadcastTime = () => {

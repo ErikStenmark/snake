@@ -22,10 +22,12 @@ import MainMenu, {
 
 const runSpy = jest.fn();
 const optionsSpy = jest.fn();
+const gameOverSpy = jest.fn();
 
 const mockEngine = new MockEngine();
 mockEngine.run = runSpy;
 mockEngine.setOptions = optionsSpy;
+mockEngine.setOnGameOver = gameOverSpy;
 
 const wrapper = menuProviderWrapper(mockEngine);
 const { render } = renderFactory(MainMenu, { renderOpts: { wrapper } });

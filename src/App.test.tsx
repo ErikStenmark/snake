@@ -1,3 +1,4 @@
+import React from 'react';
 import App from './app';
 import { render, screen } from '@testing-library/react';
 import { mainMenuTitle } from './components/main-menu';
