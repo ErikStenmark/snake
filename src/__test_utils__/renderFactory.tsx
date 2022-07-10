@@ -1,9 +1,7 @@
 import React from 'react';
 import { render as rtlRender, RenderOptions } from '@testing-library/react';
-import MenuProvider from '../menu-context/menu-provider';
-import { MockEngine } from './mock-engine';
 
-type Component = React.ComponentType<any>;
+type Component<T> = React.ComponentType<T>;
 
 export interface IComponentFactoryProps<T> {
   defaultProps?: T;
@@ -13,7 +11,7 @@ export type RenderFactoryProps<T> = IComponentFactoryProps<T> & {
   renderOpts?: RenderOptions
 };
 
-export const componentFactory = <T extends {}>(component: Component, opts?: IComponentFactoryProps<T>) => {
+export const componentFactory = <T extends {}>(component: Component<T>, opts?: IComponentFactoryProps<T>) => {
   return (newProps: Partial<T> = {}) => {
     const Component = component;
     const props = { ...opts?.defaultProps, ...newProps };
@@ -27,7 +25,7 @@ export const componentFactory = <T extends {}>(component: Component, opts?: ICom
 };
 
 
-export const renderFactory = <T extends {}>(component: Component, opts?: RenderFactoryProps<T>) => {
+export const renderFactory = <T extends {}>(component: Component<T>, opts?: RenderFactoryProps<T>) => {
   const create = componentFactory(component, opts);
 
   const render = (newProps: Partial<T> = {}) => {

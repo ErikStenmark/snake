@@ -32,5 +32,4 @@ export const useGame = (engine: IEngine): MenuContextProps => {
   useGameControls(props);
 
   return props;
-
 }

@@ -2,10 +2,16 @@ import React from 'react';
 import { useMenu } from '../../menu-context';
 import Menu from '../menu';
 import style from './game-over-menu.module.css';
+import classnames from 'classnames';
 
-type GameOverMenuProps = {
+export type GameOverMenuProps = {
   score: number;
 }
+
+export const gameOverText = '- game over -';
+export const gameOverscoreText = 'score:'
+export const goMenuPlayAgainText = 'play again';
+export const goMenuMainMenuText = 'main menu';
 
 const GameOverMenu: React.FC<GameOverMenuProps> = ({ score }) => {
   const { setEndScore, setEngineOn } = useMenu()
@@ -19,13 +25,12 @@ const GameOverMenu: React.FC<GameOverMenuProps> = ({ score }) => {
     <div className={style.root}>
       <Menu
         items={[
-          { name: 'play again', action: playAgain },
-          { name: 'main menu', action: () => setEndScore(undefined) }
+          { name: goMenuPlayAgainText, action: playAgain },
+          { name: goMenuMainMenuText, action: () => setEndScore(undefined) }
         ]}
       >
-
-        <p className={style.row}>{'- game over -'}</p>
-        <p className={style.row}>{`score: ${score}`}</p>
+        <p className={classnames(style.row, style.main)}>{gameOverText}</p>
+        <p className={style.row}>{`${gameOverscoreText} ${score}`}</p>
       </Menu>
     </div >
   )
