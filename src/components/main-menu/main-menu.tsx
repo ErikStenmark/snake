@@ -1,6 +1,6 @@
 import React from 'react';
 import { useMenu } from '../../menu-context';
-import MultiLevelMenu, { ActionItem, SubMenuItem } from '../multi-level-menu';
+import MultiLevelMenu, { MenuAction, MenuPage } from '../multi-level-menu';
 
 type GameOptSwitch = 'on' | 'off';
 export type GameOptSpeed = 'slow' | 'medium' | 'fast';
@@ -63,50 +63,68 @@ const MainMenu: React.FC = () => {
 
   return (
     <MultiLevelMenu mainTitle={mainMenuTitle}>
-      <ActionItem action={() => setEngineOn(true)}>
-        {mainPlayTitle}
-      </ActionItem>
-      <SubMenuItem title={mainOptionsTitle}>
-        <SubMenuItem title={optionsSizeTitle}>
-          <ActionItem action={setSize(optionsSizeSmall)} selected={isSize(optionsSizeSmall)}>
-            {optionsSizeSmall}
-          </ActionItem>
-          <ActionItem action={setSize(optionsSizeMedium)} selected={isSize(optionsSizeMedium)}>
-            {optionsSizeMedium}
-          </ActionItem>
-          <ActionItem action={setSize(optionsSizeLarge)} selected={isSize(optionsSizeLarge)}>
-            {optionsSizeLarge}
-          </ActionItem>
-        </SubMenuItem>
-        <SubMenuItem title={optionsWallTitle}>
-          <ActionItem action={setWalls(optionsOn)} selected={isWalls(optionsOn)}>
-            {optionsOn}
-          </ActionItem>
-          <ActionItem action={setWalls(optionsOff)} selected={isWalls(optionsOff)}>
-            {optionsOff}
-          </ActionItem>
-        </SubMenuItem>
-        <SubMenuItem title={optionsSpeedTitle}>
-          <ActionItem action={setSpeed(optionsSpeedSlow)} selected={isSpeed(optionsSpeedSlow)}>
-            {optionsSpeedSlow}
-          </ActionItem>
-          <ActionItem action={setSpeed(optionsSpeedMedium)} selected={isSpeed(optionsSpeedMedium)}>
-            {optionsSpeedMedium}
-          </ActionItem>
-          <ActionItem action={setSpeed(optionsSpeedFast)} selected={isSpeed(optionsSpeedFast)}>
-            {optionsSpeedFast}
-          </ActionItem>
-        </SubMenuItem>
-        <SubMenuItem title={optionsFPSTitle}>
-          <ActionItem action={setFps(optionsOn)} selected={isFps(optionsOn)}>
-            {optionsOn}
-          </ActionItem>
-          <ActionItem action={setFps(optionsOff)} selected={isFps(optionsOff)}>
-            {optionsOff}
-          </ActionItem>
-        </SubMenuItem>
-      </SubMenuItem>
-    </MultiLevelMenu>
+      <MenuAction title={mainPlayTitle} action={() => setEngineOn(true)} />
+      <MenuPage title={mainOptionsTitle}>
+        <MenuPage title={optionsSizeTitle}>
+          <MenuAction
+            title={optionsSizeSmall}
+            action={setSize(optionsSizeSmall)}
+            selected={isSize(optionsSizeSmall)}
+          />
+          <MenuAction
+            title={optionsSizeMedium}
+            action={setSize(optionsSizeMedium)}
+            selected={isSize(optionsSizeMedium)}
+          />
+          <MenuAction
+            title={optionsSizeLarge}
+            action={setSize(optionsSizeLarge)}
+            selected={isSize(optionsSizeLarge)}
+          />
+        </MenuPage>
+        <MenuPage title={optionsWallTitle}>
+          <MenuAction
+            title={optionsOn}
+            action={setWalls(optionsOn)}
+            selected={isWalls(optionsOn)}
+          />
+          <MenuAction
+            title={optionsOff}
+            action={setWalls(optionsOff)}
+            selected={isWalls(optionsOff)}
+          />
+        </MenuPage>
+        <MenuPage title={optionsSpeedTitle}>
+          <MenuAction
+            title={optionsSpeedSlow}
+            action={setSpeed(optionsSpeedSlow)}
+            selected={isSpeed(optionsSpeedSlow)}
+          />
+          <MenuAction
+            title={optionsSpeedMedium}
+            action={setSpeed(optionsSpeedMedium)}
+            selected={isSpeed(optionsSpeedMedium)}
+          />
+          <MenuAction
+            title={optionsSpeedFast}
+            action={setSpeed(optionsSpeedFast)}
+            selected={isSpeed(optionsSpeedFast)}
+          />
+        </MenuPage>
+        <MenuPage title={optionsFPSTitle}>
+          <MenuAction
+            title={optionsOn}
+            action={setFps(optionsOn)}
+            selected={isFps(optionsOn)}
+          />
+          <MenuAction
+            title={optionsOff}
+            action={setFps(optionsOff)}
+            selected={isFps(optionsOff)}
+          />
+        </MenuPage>
+      </MenuPage>
+    </MultiLevelMenu >
   );
 };
 

@@ -1,109 +1,96 @@
 import React from 'react';
 import Heading, { HeadingSize } from '../heading';
 import Menu, { MenuItem, MenuProps } from '../menu';
+import { MenuAction, MenuActionProps, MenuPage, MenuPageProps } from './components';
 
-type MenuAction = (...args: any) => void;
-type ActionItemProps = {
-    action: MenuAction;
-    selected?: boolean;
-    children: string | number;
-};
 
-export const ActionItem: React.FC<ActionItemProps> = () => null;
-ActionItem.displayName = 'ActionItem';
-
-type SubMenuItemProps = {
-    title: string;
-    children?: MultiLevelMenuChildren;
-};
-
-export const SubMenuItem: React.FC<SubMenuItemProps> = () => null;
-SubMenuItem.displayName = 'MenuItem';
-
-type MenuItemProps = ActionItemProps | SubMenuItemProps;
+type MenuItemProps = MenuActionProps | MenuPageProps;
 type MultiLevelMenuChild = React.ReactElement<MenuItemProps>;
-type MultiLevelMenuChildren = MultiLevelMenuChild | Array<MultiLevelMenuChild>;
+export type MultiLevelMenuChildren = MultiLevelMenuChild | Array<MultiLevelMenuChild>;
 
 export type MultiLevelMenuProps = Partial<MenuProps> & {
-    mainTitle?: string;
-    children?: MultiLevelMenuChildren;
+  mainTitle?: string;
+  children?: MultiLevelMenuChildren;
 };
 
+const allowedChildren = [
+  MenuAction.displayName,
+  MenuPage.displayName
+];
+
 export const MultiLevelMenu: React.FC<MultiLevelMenuProps> = ({ children, mainTitle, ...rest }) => {
-    const [screen, setScreen] = React.useState<MultiLevelMenuChildren>(children);
-    const [breadCrumbs, setBreadCrumbs] = React.useState<string[]>([]);
+  const [screen, setScreen] = React.useState<MultiLevelMenuChildren>(children);
+  const [breadCrumbs, setBreadCrumbs] = React.useState<string[]>([]);
 
-    const getItemName = (item: MultiLevelMenuChild) => {
-        if (item.type === ActionItem) {
-            return item.props.children.toString();
+  const travelToLastCrumb = () => {
+    if (!breadCrumbs.length) {
+      setScreen(children);
+    } else {
+      let temp: MultiLevelMenuChildren;
+      breadCrumbs.forEach((crumb, i) => {
+        const current = i === 0 ? children : temp;
+        const currentArr = Array.isArray(current) ? current : [current];
+        const next = currentArr.find(item => item.props.title === crumb);
+
+        if (next) {
+          temp = (next.props.children as MultiLevelMenuChildren);
         }
 
-        return (item.props as SubMenuItemProps).title.toString();
-    };
-
-    const travelToLastCrumb = () => {
-        if (!breadCrumbs.length) {
-            setScreen(children);
-        } else {
-            let temp: MultiLevelMenuChildren;
-            breadCrumbs.forEach((crumb, i) => {
-                const current = i === 0 ? children : temp;
-                const currentArr = Array.isArray(current) ? current : [current];
-                const next = currentArr.find(item => getItemName(item) === crumb);
-
-                if (next) {
-                    temp = (next.props.children as MultiLevelMenuChildren);
-                }
-
-                if (i === breadCrumbs.length - 1) {
-                    setScreen(temp);
-                }
-            });
+        if (i === breadCrumbs.length - 1) {
+          setScreen(temp);
         }
-    };
+      });
+    }
+  };
 
-    React.useEffect(() => {
-        travelToLastCrumb();
-    }, [children, travelToLastCrumb]);
+  React.useEffect(() => {
+    travelToLastCrumb();
+  }, [children, travelToLastCrumb]);
 
-    const menuItems: MenuItem[] = React.Children.map(screen, item => {
-        const type = item.type as React.FC;
-        const variant = type.displayName === ActionItem.displayName ? 'action' : 'submenu';
+  const menuItems: MenuItem[] = [];
 
-        const name = getItemName(item);
+  React.Children.forEach(screen, item => {
+    const { type, props } = item;
+    const { displayName } = type as React.FC;
 
-        const selected = variant === 'action'
-            ? (item.props as ActionItemProps).selected
-            : false;
+    if (allowedChildren.includes(displayName)) {
+      const isAction = displayName === MenuAction.displayName;
+      const { title } = props;
 
-        const action = variant === 'action'
-            ? (item.props as ActionItemProps).action
-            : () => {
-                setBreadCrumbs([...breadCrumbs, name]);
-                setScreen((item.props as SubMenuItemProps).children as MultiLevelMenuChildren);
-            };
+      const selected = isAction
+        ? (props as MenuActionProps).selected
+        : false;
 
-        return { name, action, selected };
-    });
+      const action = isAction
+        ? (props as MenuActionProps).action
+        : () => {
+          setBreadCrumbs([...breadCrumbs, title]);
+          setScreen((props as MenuPageProps).children as MultiLevelMenuChildren);
+        };
 
-    const back = () => {
-        breadCrumbs.pop();
-        travelToLastCrumb();
-    };
+      menuItems.push({ name: title, action, selected });
+    }
 
-    const heading = breadCrumbs.length
-        ? breadCrumbs[breadCrumbs.length - 1]
-        : mainTitle;
+  });
 
-    const headingSize = breadCrumbs.length
-        ? HeadingSize.SMALL
-        : HeadingSize.LARGE;
+  const back = () => {
+    breadCrumbs.pop();
+    travelToLastCrumb();
+  };
 
-    return (
-        <Menu {...rest} items={menuItems} onExit={back}>
-            {!!heading && <Heading size={headingSize}>{heading}</Heading>}
-        </Menu>
-    );
+  const heading = breadCrumbs.length
+    ? breadCrumbs[breadCrumbs.length - 1]
+    : mainTitle;
+
+  const headingSize = breadCrumbs.length
+    ? HeadingSize.SMALL
+    : HeadingSize.LARGE;
+
+  return (
+    <Menu {...rest} items={menuItems} onExit={back}>
+      {!!heading && <Heading size={headingSize}>{heading}</Heading>}
+    </Menu>
+  );
 };
 
 MultiLevelMenu.displayName = 'MultiLevelMenu';

@@ -22,7 +22,7 @@ const App: React.FC = () => {
   const gameOver = <GameOverMenu score={endScore} />
 
   return (
-    <div className="App">
+    <div className='App'>
       {!isNaN(endScore) ? gameOver : main}
     </div >
   );
