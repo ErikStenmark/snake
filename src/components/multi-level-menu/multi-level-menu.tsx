@@ -1,7 +1,7 @@
 import React from 'react';
 import Heading, { HeadingSize } from '../heading';
 import Menu, { MenuItem, MenuProps } from '../menu';
-import { MenuAction, MenuActionProps, MenuPage, MenuPageProps } from './components';
+import { MenuAction, MenuActionProps, MenuPage, MenuPageProps } from './components/children';
 
 
 type MenuItemProps = MenuActionProps | MenuPageProps;

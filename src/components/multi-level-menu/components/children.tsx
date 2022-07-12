@@ -1,4 +1,4 @@
-import { MultiLevelMenuChildren } from './multi-level-menu';
+import { MultiLevelMenuChildren } from '../multi-level-menu';
 
 export type MenuActionProps = {
   title: string;
