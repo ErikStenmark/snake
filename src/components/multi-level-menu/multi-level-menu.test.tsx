@@ -27,11 +27,11 @@ const Component: React.FC = () =>
 
 const { render } = renderFactory(Component);
 
-
 describe(`Component: ${MultiLevelMenu.displayName}`, () => {
 
   it('should display correct items', () => {
     render();
+
     expect(screen.getByText(action1Props.title)).toBeInTheDocument();
     expect(screen.getByText(page1Props.title)).toBeInTheDocument();
 
@@ -42,6 +42,7 @@ describe(`Component: ${MultiLevelMenu.displayName}`, () => {
 
   it('should display active items', () => {
     const { container } = render();
+
     const [button1, button2] = screen.getAllByRole('button');
     expect(button1.classList.contains('active')).toBeTruthy();
     expect(button2.classList.contains('active')).toBeFalsy();
