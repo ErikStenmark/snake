@@ -39,6 +39,7 @@ export const MultiLevelMenu: React.FC<MultiLevelMenuProps> = ({ children, mainTi
         if (i === breadCrumbs.length - 1) {
           setScreen(temp);
         }
+
       });
     }
   };
