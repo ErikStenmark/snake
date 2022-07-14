@@ -1,8 +1,7 @@
 import React from 'react';
 import { IEngine } from '../game/engine';
 import { useGame } from '../hooks/use-game';
-
-import MenuContext, { menuContextFactory } from './menu-context';
+import { MenuContext, menuContextFactory } from './menu-context';
 
 export type MenuProviderProps = React.PropsWithChildren<{
   engine: IEngine;

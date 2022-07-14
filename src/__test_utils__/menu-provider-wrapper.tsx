@@ -1,15 +1,23 @@
-import React from 'react'
 import { IEngine } from '../game/engine';
 import { MockEngine } from './mock-engine';
-import MenuProvider from '../menu-context';
+import { MenuContextProps } from '../menu-context';
+import { mockMenuProviderFactory } from './mock-menu-provider-factory';
 
 const defaultEngine = new MockEngine();
 
-export const menuProviderWrapper = (mockEngine: IEngine = defaultEngine) => {
+type MenuProviderWrapperProps = Partial<{
+  mockEngine: IEngine;
+  menuProps: Partial<MenuContextProps>
+}>
+
+export const menuProviderWrapper = (opts: MenuProviderWrapperProps = {}) => {
+  const Provider = mockMenuProviderFactory(opts.menuProps);
+  const mockEngine = !!opts.mockEngine ? opts.mockEngine : defaultEngine;
+
   /* eslint-disable react/display-name */
   return ({ children }: any) => (
-    <MenuProvider engine={mockEngine}>
+    <Provider engine={mockEngine}>
       {children}
-    </MenuProvider>
+    </Provider>
   );
 }

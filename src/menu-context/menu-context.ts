@@ -22,11 +22,9 @@ export const menuContextFactory = (props: MenuContextProps) => ({
   getMenu: () => createMenu(props)
 });
 
-const gameContext = createContext<MenuContext>(menuContextFactory(defaultMenuContextProps));
 
 export const useMenu = (): MenuContextProps => {
-  return useContext(gameContext).getMenu().getProps()
+  return useContext(MenuContext).getMenu().getProps()
 }
 
-
-export default gameContext;
+export const MenuContext = createContext<MenuContext>(menuContextFactory(defaultMenuContextProps));

@@ -16,7 +16,7 @@ const defaultProps: GameOverMenuProps = {
 const mockEngine = new MockEngine();
 mockEngine.run = jest.fn();
 
-const wrapper = menuProviderWrapper(mockEngine);
+const wrapper = menuProviderWrapper({ mockEngine });
 
 const { render } = renderFactory(GameOverMenu, { defaultProps, renderOpts: { wrapper } });
 

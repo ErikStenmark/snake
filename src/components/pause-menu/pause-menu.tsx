@@ -2,6 +2,8 @@ import React from 'react';
 import { useMenu } from '../../menu-context';
 import style from './pause-menu.module.css';
 
+export const pauseMenuText = '- pause -';
+
 const PauseMenu: React.FC = () => {
   const { isPaused } = useMenu();
 
@@ -10,7 +12,7 @@ const PauseMenu: React.FC = () => {
   }
 
   return (
-    <div className={style.root}>{'- pause -'}</div>
+    <div className={style.root}>{pauseMenuText}</div>
   )
 }
 
