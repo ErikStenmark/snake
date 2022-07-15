@@ -5,7 +5,7 @@ const useGamePause = (engine: IEngine, isRunning: boolean): [boolean, () => void
   const [isPaused, setIsPaused] = React.useState(false);
 
   const togglePause = () => {
-    setIsPaused(engine.pause() as boolean);
+    setIsPaused(engine.pause());
   }
 
   if (!isRunning && !!isPaused) {
