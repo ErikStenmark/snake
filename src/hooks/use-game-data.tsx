@@ -13,7 +13,6 @@ const useGameData = (engine: IEngine) => {
   }, [engine]);
 
   return gameData;
-
 }
 
 export default useGameData;
