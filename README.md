@@ -1,5 +1,5 @@
 # Snake
 
-A snake game that I coded as an challenge for myself to see if I was able to create a complete snake game without any help from tutorials, stackoverflow or any other forums.
+A overengineered snake game that I made as an challenge to complete a snake game without any tutorials, stackoverflow or any other help. Also used this project to familiarize myself with Electron and RTL.
 
 The game can be run in a electron shell with ```npm run dev```
